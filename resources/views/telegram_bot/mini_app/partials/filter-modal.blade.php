@@ -7,7 +7,10 @@
 
         <!-- Sheet Header -->
         <div class="sheet-header">
-            <h3 class="sheet-title">Qidiruv Sozlamalari ⚙️</h3>
+            <div class="sheet-header-top-row">
+                <h3 class="sheet-title">Qidiruv Sozlamalari ⚙️</h3>
+                <button type="button" class="sheet-close-btn" onclick="closeFilterModal(event)" title="Yopish">✕</button>
+            </div>
             <p class="sheet-subtitle">Sizga qanday insonlar ko'rinishini sozlang</p>
         </div>
 

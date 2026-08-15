@@ -14,7 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- External Compiled CSS -->
+    <!-- Tailwind CSS v4 & App Bundle (Vite) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- External Compiled Mobile Native CSS (Animations, Keyframes, Glassmorphism) -->
     <link rel="stylesheet" href="/assets/css/miniapp.css">
 
     <!-- Canvas Confetti for Celebration -->
@@ -23,7 +26,21 @@
 <body>
 
 <div class="app-container">
-    <div class="onboarding-screen-wrapper">
+    <!-- Initial Branded Splash Screen -->
+    <div id="app-splash" class="app-splash">
+        <div class="splash-logo-circle">
+            <svg viewBox="0 0 24 24" class="splash-heart-svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+        </div>
+        <div class="splash-brand-title">MatchMe</div>
+        <div class="splash-brand-subtitle">DATING APP</div>
+        <div class="splash-loader-bar">
+            <div class="splash-loader-progress"></div>
+        </div>
+    </div>
+
+    <div class="onboarding-screen-wrapper" id="onboarding-main-wrapper" style="display: none;">
         {{-- Header --}}
         @include('telegram_bot.mini_app.partials.header')
 

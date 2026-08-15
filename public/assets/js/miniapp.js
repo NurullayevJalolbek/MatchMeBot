@@ -32,6 +32,11 @@ if (tg) {
     } catch (e) {}
 }
 
+// Instant redirect if user already completed onboarding
+if ((window.location.pathname === '/' || window.location.pathname === '/app') && localStorage.getItem('matchme_onboarding_completed') === 'true') {
+    window.location.replace('/discovery');
+}
+
 // On Page Load
 document.addEventListener('DOMContentLoaded', async () => {
     // Preset default date
@@ -69,6 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isCompleted = data.data.is_completed || data.data.user.onboarding_completed;
             const currentPath = window.location.pathname;
 
+            if (isCompleted) {
+                localStorage.setItem('matchme_onboarding_completed', 'true');
+            }
+
             // If onboarding is completed and user is on welcome/register page, jump straight to Discovery!
             if (isCompleted && (currentPath === '/' || currentPath === '/app')) {
                 window.location.replace('/discovery');
@@ -90,8 +99,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderPhotoSlots(state.photos);
             }
         }
+
+        // Smoothly reveal onboarding for new users
+        const splashEl = document.getElementById('app-splash');
+        const onboardingWrapper = document.getElementById('onboarding-main-wrapper');
+        const welcomeScreen = document.getElementById('screen-welcome');
+
+        if (splashEl) {
+            splashEl.style.opacity = '0';
+            setTimeout(() => { splashEl.style.display = 'none'; }, 300);
+        }
+        if (onboardingWrapper) {
+            onboardingWrapper.style.display = 'flex';
+        }
+        if (welcomeScreen && !document.querySelector('.screen.active')) {
+            welcomeScreen.classList.add('active');
+        }
     } catch (e) {
         console.log('Init error:', e);
+        const splashEl = document.getElementById('app-splash');
+        const onboardingWrapper = document.getElementById('onboarding-main-wrapper');
+        const welcomeScreen = document.getElementById('screen-welcome');
+        if (splashEl) splashEl.style.display = 'none';
+        if (onboardingWrapper) onboardingWrapper.style.display = 'flex';
+        if (welcomeScreen) welcomeScreen.classList.add('active');
     }
 });
 
@@ -380,6 +411,7 @@ async function submitStep6() {
     }
 
     await saveStepApi(6, { photos: state.photos });
+    localStorage.setItem('matchme_onboarding_completed', 'true');
 
     // Show celebration
     haptic();
@@ -434,10 +466,6 @@ function switchNavTab(e, tabName) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     const activeItem = document.getElementById(`nav-item-${tabName}`);
     if (activeItem) activeItem.classList.add('active');
-
-    if (tabName !== 'tanishuv') {
-        alert(`📌 "${tabName.toUpperCase()}" bo'limi tez orada ishga tushadi!`);
-    }
 }
 
 // Card Swipe & Actions (Dislike / Gift / Like)
@@ -490,7 +518,7 @@ function handleCardAction(action) {
         photoBox.style.opacity = '0.4';
     } else if (action === 'gift') {
         photoBox.style.transform = 'scale(1.08)';
-        alert('🎁 TOP-1 Sovg\'angiz Asalga yuborildi!');
+        confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
     }
 
     setTimeout(() => {
@@ -519,27 +547,301 @@ function loadProfileCard(profile) {
 
 function openReportModal() {
     haptic();
-    alert("⚠️ Ushbu profil ustidan shikoyat qilish yoki xavfsizlikka xabar berish.");
 }
 
 function toggleProfileDetails() {
     haptic();
-    alert("📄 Foydalanuvchining to'liq anketasi ochilmoqda...");
 }
 
 function openBonusModal() {
     haptic();
-    alert("🎁 Kunlik bonus: Sizga 1-kunlik bepul Layklar va VIP imkoniyat berildi!");
 }
+
+// ==================== WALLET & DEPOSIT LOGIC ====================
+let selectedDepositFile = null;
 
 function openBalanceModal() {
     haptic();
-    alert("🪙 Balansni to'ldirish (Click / Payme) tez orada ulanadi!");
+    const modal = document.getElementById('wallet-modal-overlay');
+    if (!modal) return;
+
+    // Fetch user balance
+    if (state.userId) {
+        fetch(`/api/wallet/balance?user_id=${state.userId}`, {
+            headers: { 'lang': 'uz' }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status && res.data) {
+                const balEl = document.getElementById('modal-current-balance');
+                if (balEl) balEl.innerText = `Balans: ${res.data.formatted_balance}`;
+                if (res.data.card_number) {
+                    const cardEl = document.getElementById('wallet-card-number');
+                    if (cardEl) cardEl.innerText = res.data.card_number;
+                }
+            }
+        })
+        .catch(e => console.log('Wallet load error:', e));
+    }
+
+    modal.classList.add('active');
+    checkDepositValidity();
 }
+
+function closeWalletModal(e) {
+    if (e) e.stopPropagation();
+    haptic();
+    const modal = document.getElementById('wallet-modal-overlay');
+    if (modal) modal.classList.remove('active');
+}
+
+function checkDepositValidity() {
+    const amountInput = document.getElementById('input-deposit-amount');
+    const amount = parseFloat(amountInput ? amountInput.value : 0);
+    const btn = document.getElementById('btn-submit-deposit');
+
+    const isValid = amount >= 1000 && selectedDepositFile !== null;
+
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+}
+
+function selectPresetAmount(amount) {
+    haptic();
+    const input = document.getElementById('input-deposit-amount');
+    if (input) input.value = amount;
+
+    document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`preset-${amount}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    checkDepositValidity();
+}
+
+function onCustomAmountChange(val) {
+    const num = parseInt(val, 10);
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `preset-${num}`);
+    });
+
+    checkDepositValidity();
+}
+
+function copyCardNumber() {
+    haptic();
+    const cardEl = document.getElementById('wallet-card-number');
+    const cardText = (cardEl ? cardEl.innerText : '5614 6819 1495 1557').replace(/\s+/g, '');
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(cardText).catch(() => {});
+    }
+
+    const copyBtn = document.querySelector('.btn-copy-card');
+    if (copyBtn) {
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span>✔ Nusxalandi!</span>';
+        setTimeout(() => { copyBtn.innerHTML = originalHtml; }, 1800);
+    }
+}
+
+function triggerReceiptFileSelect() {
+    haptic();
+    document.getElementById('input-receipt-file')?.click();
+}
+
+function handleReceiptFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    selectedDepositFile = file;
+
+    const emptyView = document.getElementById('receipt-empty-view');
+    const previewView = document.getElementById('receipt-preview-view');
+    const previewImg = document.getElementById('receipt-preview-img');
+    const nameEl = document.getElementById('receipt-file-name');
+
+    if (nameEl) nameEl.innerText = file.name;
+
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (previewImg) previewImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        if (previewImg) previewImg.src = '/assets/images/pdf-icon.png';
+    }
+
+    if (emptyView) emptyView.style.display = 'none';
+    if (previewView) previewView.style.display = 'flex';
+
+    checkDepositValidity();
+}
+
+function removeReceiptFile(event) {
+    if (event) event.stopPropagation();
+    haptic();
+
+    selectedDepositFile = null;
+    const fileInput = document.getElementById('input-receipt-file');
+    if (fileInput) fileInput.value = '';
+
+    const emptyView = document.getElementById('receipt-empty-view');
+    const previewView = document.getElementById('receipt-preview-view');
+
+    if (emptyView) emptyView.style.display = 'flex';
+    if (previewView) previewView.style.display = 'none';
+
+    checkDepositValidity();
+}
+
+async function submitDepositPayment() {
+    haptic();
+    const amountInput = document.getElementById('input-deposit-amount');
+    const amount = parseFloat(amountInput ? amountInput.value : 0);
+
+    if (!amount || amount < 1000) {
+        amountInput?.focus();
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit-deposit');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Tekshirilmoqda...</span>';
+    }
+
+    const formData = new FormData();
+    formData.append('user_id', state.userId || window.APP_DEFAULT_USER_ID || 1);
+    formData.append('amount', amount);
+    if (selectedDepositFile) {
+        formData.append('receipt', selectedDepositFile);
+    }
+
+    try {
+        const res = await fetch('/api/wallet/deposit', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'lang': 'uz'
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.status) {
+            closeWalletModal();
+            removeReceiptFile();
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
+            }
+        }
+    } catch (e) {
+        console.log('Deposit error:', e);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="btn-icon">✔</span><span>To\'lovni Tasdiqlash & Balansga Qo\'shish</span>';
+        }
+    }
+}
+
+// ==================== BOOST LOGIC ====================
+let selectedBoostPlanId = 2;
+let selectedBoostPrice = 20000;
 
 function openBoostModal() {
     haptic();
-    alert("⚡ Boost faollashtirildi! Anketangiz 30 daqiqa davomida 1-o'rinda ko'rinadi!");
+    const modal = document.getElementById('boost-modal-overlay');
+    if (!modal) return;
+
+    // Fetch user balance and boost status
+    if (state.userId) {
+        fetch(`/api/boost/status?user_id=${state.userId}`, {
+            headers: { 'lang': 'uz' }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status && res.data) {
+                const balEl = document.getElementById('boost-modal-balance');
+                if (balEl) balEl.innerText = `Balans: ${res.data.formatted_balance}`;
+            }
+        })
+        .catch(e => console.log('Boost status error:', e));
+    }
+
+    modal.classList.add('active');
+}
+
+function closeBoostModal(e) {
+    if (e) e.stopPropagation();
+    haptic();
+    const modal = document.getElementById('boost-modal-overlay');
+    if (modal) modal.classList.remove('active');
+}
+
+function selectBoostPlan(planId, price) {
+    haptic();
+    selectedBoostPlanId = parseInt(planId, 10);
+    selectedBoostPrice = price;
+
+    document.querySelectorAll('.boost-plan-card').forEach(card => card.classList.remove('active'));
+    const activeCard = document.getElementById(`boost-plan-${planId}`);
+    if (activeCard) activeCard.classList.add('active');
+
+    const labelEl = document.getElementById('btn-boost-label');
+    if (labelEl) {
+        labelEl.innerText = `Balansdan Faollashtirish (${price.toLocaleString()} UZS)`;
+    }
+}
+
+async function activateSelectedBoost() {
+    haptic();
+    const btn = document.getElementById('btn-activate-boost');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Faollashtirilmoqda...</span>';
+    }
+
+    try {
+        const res = await fetch('/api/boost/activate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'lang': 'uz'
+            },
+            body: JSON.stringify({
+                user_id: state.userId || window.APP_DEFAULT_USER_ID || 1,
+                plan_id: selectedBoostPlanId
+            })
+        });
+
+        const data = await res.json();
+        if (data.status) {
+            closeBoostModal();
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+            }
+        } else {
+            // Insufficient balance: redirect user to Top up Wallet
+            closeBoostModal();
+            openBalanceModal();
+            if (data.data?.required_amount) {
+                selectPresetAmount(Math.max(20000, data.data.required_amount));
+            }
+        }
+    } catch (e) {
+        console.log('Boost activate error:', e);
+        closeBoostModal();
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="btn-icon">⚡</span><span id="btn-boost-label">Balansdan Faollashtirish (${selectedBoostPrice.toLocaleString()} UZS)</span>`;
+        }
+    }
 }
 
 // Discovery Filter Bottom Sheet Logic
@@ -626,6 +928,9 @@ async function saveFilterSettings() {
     haptic();
     filterState.city = document.getElementById('select-filter-city')?.value || 'all';
 
+    // Instantly close modal smoothly
+    closeFilterModal();
+
     try {
         const res = await fetch('/api/discovery/filter', {
             method: 'POST',
@@ -642,17 +947,12 @@ async function saveFilterSettings() {
 
         const data = await res.json();
         if (data.status) {
-            closeFilterModal();
-            // Refresh card stack
+            // Refresh cards smoothly
             currentProfileIndex = 0;
             loadProfileCard(sampleProfiles[0]);
-            alert('✅ Filtrlash sozlamalari muvaffaqiyatli saqlandi!');
-        } else {
-            alert(data.message || 'Xatolik yuz berdi');
         }
     } catch (e) {
         console.log('Filter save error:', e);
-        closeFilterModal();
     }
 }
 
@@ -668,4 +968,132 @@ function openPrivacyModal() {
 function closeModals() {
     haptic();
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+}
+
+// ==================== LIKES & GIFTS ACTIONS ====================
+async function handleLikeAccept(likeId) {
+    haptic();
+    const card = document.getElementById(`like-card-${likeId}`);
+    if (card) {
+        card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        card.style.transform = 'scale(1.08)';
+        card.style.opacity = '0';
+        setTimeout(() => { 
+            card.remove(); 
+            updateLikesBadge(); 
+        }, 280);
+    }
+
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+    }
+
+    try {
+        await fetch('/api/likes/accept', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'lang': 'uz'
+            },
+            body: JSON.stringify({
+                user_id: state.userId || window.APP_DEFAULT_USER_ID || 1,
+                like_id: likeId
+            })
+        });
+    } catch (e) {
+        console.log('Like accept error:', e);
+    }
+}
+
+async function handleLikeReject(likeId) {
+    haptic();
+    const card = document.getElementById(`like-card-${likeId}`);
+    if (card) {
+        card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        card.style.transform = 'scale(0.85)';
+        card.style.opacity = '0';
+        setTimeout(() => { 
+            card.remove(); 
+            updateLikesBadge(); 
+        }, 280);
+    }
+
+    try {
+        await fetch('/api/likes/reject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'lang': 'uz'
+            },
+            body: JSON.stringify({
+                user_id: state.userId || window.APP_DEFAULT_USER_ID || 1,
+                like_id: likeId
+            })
+        });
+    } catch (e) {
+        console.log('Like reject error:', e);
+    }
+}
+
+function updateLikesBadge() {
+    const vipCount = document.querySelectorAll('.vip-profile-card').length;
+    const regCount = document.querySelectorAll('.regular-like-card').length;
+    const totalLikes = vipCount + regCount;
+
+    const badge = document.getElementById('badge-likes-count');
+    const regularBadge = document.getElementById('regular-count-badge');
+    const vipBadge = document.getElementById('vip-count-badge');
+    const vipSection = document.getElementById('vip-gifts-section');
+    const regSection = document.getElementById('regular-likes-section');
+    const scrollContent = document.querySelector('.likes-scroll-content');
+
+    if (badge) badge.innerText = totalLikes;
+    if (regularBadge) regularBadge.innerText = `${regCount} ta yangi`;
+    if (vipBadge) vipBadge.innerText = `${vipCount} ta sovg'a`;
+
+    if (vipCount === 0 && vipSection) {
+        vipSection.remove();
+    }
+    if (regCount === 0 && regSection) {
+        regSection.remove();
+    }
+
+    if (totalLikes === 0 && scrollContent && !document.getElementById('likes-empty-container')) {
+        scrollContent.innerHTML = `
+            <div class="likes-empty-container" id="likes-empty-container">
+                <div class="empty-glow-circle">
+                    <svg viewBox="0 0 24 24" class="empty-heart-svg">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </div>
+                <h3 class="empty-title">Hozircha yangi layklar yo'q</h3>
+                <p class="empty-description">
+                    Profilni yanada ko'proq insonlar ko'rishi uchun tanishuvlar orqali birinchi bo'lib layk bosing yoki profilingizni faollashtiring ✨
+                </p>
+                <a href="/discovery" class="btn-go-discovery">
+                    <span class="btn-go-icon">🎴</span>
+                    <span>Tanishuvlarga O'tish</span>
+                    <span class="btn-go-arrow">➔</span>
+                </a>
+            </div>
+        `;
+    }
+}
+
+// Load balance on Likes Page load
+if (window.location.pathname.includes('/likes')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const uid = state.userId || window.APP_DEFAULT_USER_ID || 1;
+        fetch(`/api/wallet/balance?user_id=${uid}`, { headers: { 'lang': 'uz' } })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status && res.data) {
+                    const el = document.getElementById('likes-page-balance');
+                    if (el) el.innerText = res.data.formatted_balance;
+                }
+            })
+            .catch(() => {});
+    });
 }

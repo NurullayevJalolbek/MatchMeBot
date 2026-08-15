@@ -157,13 +157,16 @@ class TelegramBotHandlerService
             default => "🚀 MatchMe'ni ochish",
         };
 
+        $user = $this->userService->getByTelegramId($chatId);
+        $targetUrl = ($user && $user->onboarding_completed) ? rtrim($webAppUrl, '/') . '/discovery' : $webAppUrl;
+
         $keyboard = [
             'inline_keyboard' => [
                 [
                     [
                         'text' => $buttonText,
                         'web_app' => [
-                            'url' => $webAppUrl,
+                            'url' => $targetUrl,
                         ],
                     ],
                 ],

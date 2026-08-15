@@ -72,6 +72,7 @@ class User extends Authenticatable
             'daily_streak' => 'integer',
             'is_vip' => 'boolean',
             'vip_expires_at' => 'datetime',
+            'boost_expires_at' => 'datetime',
             'is_terms_accepted' => 'boolean',
             'terms_accepted_at' => 'datetime',
             'email_verified_at' => 'datetime',
@@ -106,6 +107,14 @@ class User extends Authenticatable
     }
 
     /**
+     * User balance deposits.
+     */
+    public function deposits(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
+    /**
      * Primary / Main photo.
      */
     public function primaryPhoto(): MorphOne
@@ -113,6 +122,22 @@ class User extends Authenticatable
         return $this->morphOne(ModelFile::class, 'model')
             ->where('file_type', 'photo')
             ->where('is_main', true);
+    }
+
+    /**
+     * Likes/Gifts received by this user.
+     */
+    public function receivedLikes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserLike::class, 'to_user_id');
+    }
+
+    /**
+     * Likes/Gifts sent by this user.
+     */
+    public function sentLikes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserLike::class, 'from_user_id');
     }
 
     /**

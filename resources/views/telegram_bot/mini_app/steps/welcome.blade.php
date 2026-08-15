@@ -1,5 +1,5 @@
 <!-- ==================== SCREEN 0: WELCOME SCREEN ==================== -->
-<section id="screen-welcome" class="screen active">
+<section id="screen-welcome" class="screen">
     <div class="hero-card">
         <div class="hero-image-wrapper">
             <img src="/images/hero_illustration.jpg" alt="MatchMe Dating Hero" onerror="this.src='/images/welcome-banner.jpg'">

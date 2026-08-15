@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\BoostController;
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\OnboardingController;
+use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\TelegramBotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,4 +29,23 @@ Route::prefix('onboarding')->middleware(['locale'])->group(function () {
 Route::prefix('discovery')->middleware(['locale'])->group(function () {
     Route::get('/filter', [DiscoveryController::class, 'getFilter'])->name('api.discovery.get_filter');
     Route::post('/filter', [DiscoveryController::class, 'saveFilter'])->name('api.discovery.save_filter');
+});
+
+// Wallet & Deposit API Routes
+Route::prefix('wallet')->middleware(['locale'])->group(function () {
+    Route::get('/balance', [WalletController::class, 'getBalance'])->name('api.wallet.get_balance');
+    Route::post('/deposit', [WalletController::class, 'submitDeposit'])->name('api.wallet.deposit');
+});
+
+// Boost API Routes
+Route::prefix('boost')->middleware(['locale'])->group(function () {
+    Route::get('/status', [BoostController::class, 'getStatus'])->name('api.boost.status');
+    Route::post('/activate', [BoostController::class, 'activate'])->name('api.boost.activate');
+});
+
+// Likes & VIP Gifts API Routes
+Route::prefix('likes')->middleware(['locale'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\LikesController::class, 'getLikes'])->name('api.likes.index');
+    Route::post('/accept', [\App\Http\Controllers\Api\LikesController::class, 'accept'])->name('api.likes.accept');
+    Route::post('/reject', [\App\Http\Controllers\Api\LikesController::class, 'reject'])->name('api.likes.reject');
 });

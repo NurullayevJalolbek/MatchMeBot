@@ -16,6 +16,10 @@ Route::get('/discovery', function () {
     return view('telegram_bot.mini_app.pages.discovery');
 })->name('discovery');
 
+Route::get('/likes', function () {
+    return view('telegram_bot.mini_app.pages.likes');
+})->name('likes');
+
 // Admin Panel Views
 Route::get('/admin', function () {
     return view('admin.pages.dashboard.index');

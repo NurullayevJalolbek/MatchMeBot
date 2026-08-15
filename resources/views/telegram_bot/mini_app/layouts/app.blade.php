@@ -14,7 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- External Compiled CSS -->
+    <!-- Tailwind CSS v4 & App Bundle (Vite) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- External Compiled Mobile Native CSS (Animations, Keyframes, Glassmorphism) -->
     <link rel="stylesheet" href="/assets/css/miniapp.css">
 
     <!-- Canvas Confetti for Celebration -->
@@ -42,6 +45,8 @@
 {{-- Universal Modals --}}
 @include('telegram_bot.mini_app.partials.modals')
 @include('telegram_bot.mini_app.partials.filter-modal')
+@include('telegram_bot.mini_app.partials.wallet-modal')
+@include('telegram_bot.mini_app.partials.boost-modal')
 
 <!-- Global User Config -->
 <script>
