@@ -13,10 +13,30 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->bigInteger('telegram_id')->unique()->nullable()->index();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('username')->nullable()->index();
+            $table->string('language_code', 10)->default('uz');
+            $table->string('name')->nullable();
+            $table->date('birth_date')->nullable();
+            $table->unsignedSmallInteger('age')->nullable()->index();
+            $table->string('gender', 10)->nullable()->index();
+            $table->string('looking_for', 10)->nullable()->index();
+            $table->string('city', 100)->nullable()->index();
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->string('bio', 250)->nullable();
+            $table->boolean('onboarding_completed')->default(false)->index();
+            $table->decimal('balance', 12, 2)->default(0);
+            $table->unsignedInteger('daily_streak')->default(0);
+            $table->boolean('is_vip')->default(false)->index();
+            $table->timestamp('vip_expires_at')->nullable();
+            $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->boolean('is_terms_accepted')->default(false);
+            $table->timestamp('terms_accepted_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

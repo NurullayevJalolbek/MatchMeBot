@@ -1,0 +1,673 @@
+:root {
+    --bg-body: #07090e;
+    --bg-card: #0e121a;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --primary: #ff2d55;
+    --primary-gradient: linear-gradient(135deg, #ff2d55 0%, #ff5379 100%);
+    --accent-gold: #ffb800;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    background-color: #000000;
+    color: var(--text-main);
+    font-family: var(--font-family);
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+}
+
+/* App Wrapper */
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    height: 100dvh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background-color: #000000;
+}
+
+/* ==================== FULL-SCREEN DISCOVERY PAGE ==================== */
+.discovery-full-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fullscreen Background Photo */
+.discovery-bg-photo-wrapper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.discovery-bg-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    display: block;
+}
+
+/* Floating Top Bar on Top of Photo */
+.discovery-top-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: calc(70px + env(safe-area-inset-top, 0px)) 16px 14px 16px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-left-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-online-pill {
+    background-color: rgba(10, 14, 22, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 50px;
+    padding: 5px 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #34d399;
+}
+
+.online-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #10b981;
+}
+
+.tool-boost-pill {
+    background-color: rgba(10, 14, 22, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 184, 0, 0.4);
+    padding: 5px 12px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #ffd066;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 184, 0, 0.2);
+}
+
+.boost-icon {
+    color: #ffb800;
+    font-size: 0.85rem;
+}
+
+.top-right-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tool-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: rgba(10, 14, 22, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.tool-icon-btn:active {
+    transform: scale(0.92);
+}
+
+.tool-icon-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Bottom User Details Overlay */
+.discovery-bottom-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 15;
+    padding: 70px 16px calc(68px + env(safe-area-inset-bottom, 8px)) 16px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 25%, rgba(0, 0, 0, 0.94) 60%, #000000 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-name-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-name-text {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+.user-verified-badge {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-verified-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
+.user-vip-badge {
+    background: linear-gradient(135deg, #ffb800, #f59e0b);
+    color: #0b0e14;
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.btn-open-details {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-open-details:active {
+    transform: scale(0.92);
+}
+
+.btn-open-details svg {
+    width: 18px;
+    height: 18px;
+}
+
+.user-city-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: -2px;
+}
+
+.user-section-title {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffd066;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.user-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.user-tag-pill {
+    background-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+/* Action Buttons Dock Floating over Card */
+.discovery-actions-dock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+    margin-top: 14px;
+    padding-bottom: 2px;
+}
+
+.action-circle-btn {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    position: relative;
+}
+
+.action-circle-btn:active {
+    transform: scale(0.86);
+}
+
+.btn-act-dislike {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(23, 29, 43, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-act-dislike svg {
+    width: 22px;
+    height: 22px;
+}
+
+.btn-act-gift {
+    width: 62px;
+    height: 62px;
+    background: linear-gradient(135deg, #ffb800, #f59e0b);
+    border: 2px solid #ffd066;
+    box-shadow: 0 8px 24px rgba(255, 184, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-act-gift .gift-emoji {
+    font-size: 1.6rem;
+    margin-top: -2px;
+}
+
+.btn-act-like {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #ff2d55, #ff5379);
+    border: 2px solid #ff7da0;
+    box-shadow: 0 10px 28px rgba(255, 45, 85, 0.6);
+}
+
+.btn-act-like svg {
+    width: 34px;
+    height: 34px;
+}
+
+/* ==================== BOTTOM NAVBAR (SEAMLESS PURE BLACK) ==================== */
+.app-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background-color: #000000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    position: relative;
+    padding: 4px 6px;
+    user-select: none;
+}
+
+.nav-item:active {
+    transform: scale(0.92);
+}
+
+.nav-icon-wrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-icon {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    transition: all 0.2s;
+}
+
+.nav-emoji-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.nav-badge {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    background: linear-gradient(135deg, #ff2d55, #ff477e);
+    color: #ffffff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 50px;
+    min-width: 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(255, 45, 85, 0.5);
+}
+
+.nav-item.active {
+    color: #ff2d55;
+}
+
+.nav-item.active .nav-icon {
+    fill: #ff2d55;
+    filter: drop-shadow(0 0 8px rgba(255, 45, 85, 0.6));
+}
+
+.nav-item.active .nav-label {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* ==================== DISCOVERY FILTER BOTTOM SHEET MODAL ==================== */
+.filter-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 999;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.filter-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.filter-bottom-sheet {
+    width: 100%;
+    max-width: 480px;
+    background-color: #121622;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    border-radius: 28px 28px 0 0;
+    padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 10px)) 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.filter-modal-overlay.active .filter-bottom-sheet {
+    transform: translateY(0);
+}
+
+.sheet-drag-handle {
+    width: 40px;
+    height: 4px;
+    border-radius: 4px;
+    background-color: #334155;
+    margin: 0 auto 16px auto;
+}
+
+.sheet-header {
+    margin-bottom: 20px;
+}
+
+.sheet-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.sheet-subtitle {
+    font-size: 0.85rem;
+    color: #8fa0bd;
+    font-weight: 500;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-label {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.filter-val-badge {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #ff2d55;
+}
+
+/* Gender 3-grid */
+.filter-gender-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.filter-gender-card {
+    background-color: #171d2b;
+    border: 1.5px solid #28334a;
+    border-radius: 14px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.filter-gender-card:active {
+    transform: scale(0.96);
+}
+
+.filter-gender-card.active {
+    border-color: #ff2d55;
+    background: linear-gradient(180deg, rgba(255, 45, 85, 0.15) 0%, rgba(255, 45, 85, 0.05) 100%);
+    box-shadow: 0 0 14px rgba(255, 45, 85, 0.3);
+}
+
+.gender-card-emoji {
+    font-size: 1.4rem;
+}
+
+.gender-card-text {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Range Slider */
+.filter-slider-wrapper {
+    width: 100%;
+    padding: 6px 0;
+}
+
+.filter-range-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 10px;
+    background: #28334a;
+    outline: none;
+    -webkit-appearance: none;
+    accent-color: #ff2d55;
+    cursor: pointer;
+}
+
+.filter-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ff2d55;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(255, 45, 85, 0.6);
+    cursor: pointer;
+}
+
+/* Custom Dropdown Select */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-filter-select {
+    width: 100%;
+    background-color: #171d2b;
+    border: 1.5px solid #28334a;
+    border-radius: 14px;
+    padding: 14px 44px 14px 16px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-filter-select:focus {
+    border-color: #ff2d55;
+    box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.15);
+}
+
+.custom-filter-select option {
+    background-color: #121622;
+    color: #ffffff;
+    padding: 12px;
+}
+
+.select-arrow-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #ff2d55;
+    display: flex;
+    align-items: center;
+}
+
+.select-arrow-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.sheet-action-row {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.btn-save-filters {
+    width: 100%;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 16px 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 45, 85, 0.4);
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.btn-save-filters:active {
+    transform: scale(0.98);
+}

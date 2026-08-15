@@ -25,15 +25,15 @@
 
 <body>
 
-    @include('layouts.sidebar')
+    @include('admin.layouts.sidebar')
 
-    @include('layouts.header')
+    @include('admin.layouts.header')
 
     <main class="nxl-container">
         <div class="nxl-content">
             @yield('content')
 
-            @include('layouts.footer')
+            @include('admin.layouts.footer')
         </div>
     </main>
 
