@@ -47,6 +47,7 @@
 @include('telegram_bot.mini_app.partials.filter-modal')
 @include('telegram_bot.mini_app.partials.wallet-modal')
 @include('telegram_bot.mini_app.partials.boost-modal')
+@include('telegram_bot.mini_app.partials.vip-modal')
 
 <!-- Global User Config -->
 <script>

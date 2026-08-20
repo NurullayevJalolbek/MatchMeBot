@@ -65,6 +65,8 @@ class User extends Authenticatable
             'telegram_id' => 'integer',
             'birth_date' => 'date:Y-m-d',
             'age' => 'integer',
+            'gender' => \App\Enums\User\GenderEnum::class,
+            'looking_for' => \App\Enums\User\GenderEnum::class,
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'onboarding_completed' => 'boolean',
@@ -169,8 +171,49 @@ class User extends Authenticatable
      *
      * @return array<string>
      */
+    /**
+     * Get array of photo URLs.
+     *
+     * @return array<string>
+     */
     public function getPhotoUrlsAttribute(): array
     {
         return $this->photos->map(fn (ModelFile $file) => $file->url)->toArray();
     }
+
+    /**
+     * User roles relationship.
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_users');
+    }
+
+    /**
+     * Check if user has specific role code.
+     */
+    public function hasRole(string $roleCode): bool
+    {
+        return $this->roles->contains('code', $roleCode);
+    }
+
+    /**
+     * Check if user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(\App\Enums\User\RoleEnum::ADMIN->value);
+    }
+
+    /**
+     * Assign role to user.
+     */
+    public function assignRole(string $roleCode): void
+    {
+        $role = Role::where('code', $roleCode)->first();
+        if ($role && !$this->hasRole($roleCode)) {
+            $this->roles()->attach($role->id);
+        }
+    }
 }
+

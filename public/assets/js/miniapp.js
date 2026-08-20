@@ -1097,3 +1097,245 @@ if (window.location.pathname.includes('/likes')) {
             .catch(() => {});
     });
 }
+
+// ==================== SPEED ROULETTE LOGIC ====================
+let selectedRouletteGender = 'all';
+let isRouletteSearching = false;
+let rouletteSearchTimer = null;
+
+function selectRouletteGender(gender) {
+    haptic();
+    selectedRouletteGender = gender;
+
+    // Update active card border in UI
+    document.querySelectorAll('.roulette-gender-card').forEach(card => card.classList.remove('active'));
+    
+    if (gender === 'female') {
+        document.getElementById('r-gender-female')?.classList.add('active');
+        openVipModal();
+    } else if (gender === 'male') {
+        document.getElementById('r-gender-male')?.classList.add('active');
+        openVipModal();
+    } else {
+        document.getElementById('r-gender-all')?.classList.add('active');
+    }
+}
+
+function openVipModal() {
+    haptic();
+    document.getElementById('vip-modal-overlay')?.classList.add('active');
+}
+
+function closeVipModal(event) {
+    if (event) event.stopPropagation();
+    haptic();
+    document.getElementById('vip-modal-overlay')?.classList.remove('active');
+}
+
+let rouletteNodeTimers = [];
+
+function toggleRouletteSearch() {
+    haptic();
+
+    // If VIP filter selected, require VIP subscription
+    if (selectedRouletteGender !== 'all') {
+        openVipModal();
+        return;
+    }
+
+    const radarContainer = document.querySelector('.roulette-radar-container');
+    const nodesLayer = document.getElementById('radar-nodes-layer');
+    const mainBtn = document.getElementById('btn-roulette-main');
+    const iconSearch = document.getElementById('btn-roulette-icon-search');
+    const iconStop = document.getElementById('btn-roulette-icon-stop');
+    const btnText = document.getElementById('btn-roulette-text');
+    const statusTitle = document.getElementById('roulette-status-title');
+    const statusSub = document.getElementById('roulette-status-sub');
+
+    if (isRouletteSearching) {
+        // Stop searching
+        isRouletteSearching = false;
+        if (rouletteSearchTimer) clearTimeout(rouletteSearchTimer);
+        rouletteNodeTimers.forEach(t => clearTimeout(t));
+        rouletteNodeTimers = [];
+
+        radarContainer?.classList.remove('searching');
+        mainBtn?.classList.remove('searching');
+        if (nodesLayer) nodesLayer.innerHTML = '';
+        if (iconSearch) iconSearch.style.display = 'block';
+        if (iconStop) iconStop.style.display = 'none';
+        if (btnText) btnText.innerText = 'Qidiruvni Boshlash';
+        if (statusTitle) statusTitle.innerText = 'Tasodifiy suhbatga tayyormisiz?';
+        if (statusSub) statusSub.innerText = 'Qidiruv tugmasini bosing va darhol yangi suhbatdosh bilan tanishing';
+    } else {
+        // Start searching with radar animation
+        isRouletteSearching = true;
+        radarContainer?.classList.add('searching');
+        mainBtn?.classList.add('searching');
+        if (nodesLayer) nodesLayer.innerHTML = '';
+        if (iconSearch) iconSearch.style.display = 'none';
+        if (iconStop) iconStop.style.display = 'block';
+        if (btnText) btnText.innerText = 'Qidiruvni To\'xtatish';
+        if (statusTitle) statusTitle.innerText = 'Sizga mos suhbatdosh qidirilmoqda...';
+        if (statusSub) statusSub.innerText = 'O\'rtacha kutish vaqti: 3–5 soniya';
+
+        // Spawn ShareIt-style discovered user nodes
+        const node1Timer = setTimeout(() => {
+            if (isRouletteSearching) spawnRadarNode('Anonim #482', 'node-pos-1');
+        }, 1200);
+
+        const node2Timer = setTimeout(() => {
+            if (isRouletteSearching) spawnRadarNode('Anonim #109', 'node-pos-2');
+        }, 2200);
+
+        const node3Timer = setTimeout(() => {
+            if (isRouletteSearching) {
+                spawnRadarNode('Anonim #731', 'node-pos-3');
+                if (statusTitle) statusTitle.innerText = '🎯 3 ta faol suhbatdosh topildi!';
+                if (statusSub) statusSub.innerText = 'Suhbatlashish uchun istalgan birining ustiga bosing';
+            }
+        }, 3200);
+
+        rouletteNodeTimers.push(node1Timer, node2Timer, node3Timer);
+    }
+}
+
+function spawnRadarNode(name, posClass) {
+    const layer = document.getElementById('radar-nodes-layer');
+    if (!layer) return;
+
+    haptic();
+    const node = document.createElement('div');
+    node.className = `radar-discovered-node ${posClass}`;
+    node.onclick = () => openAnonymousChat(name);
+    node.innerHTML = `
+        <div class="node-avatar-circle">
+            <svg viewBox="0 0 24 24" class="default-avatar-svg">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <div class="node-pulse-ring"></div>
+        </div>
+        <div class="node-name-pill">${name}</div>
+    `;
+    layer.appendChild(node);
+}
+
+// ==================== TEMPORARY ANONYMOUS CHAT HANDLERS ====================
+let currentAnonPartner = 'Anonim Suhbatdosh';
+
+function openAnonymousChat(partnerName) {
+    haptic();
+    currentAnonPartner = partnerName || 'Anonim Suhbatdosh';
+    const titleEl = document.getElementById('anon-chat-username');
+    if (titleEl) titleEl.innerText = currentAnonPartner;
+
+    const overlay = document.getElementById('anonymous-chat-overlay');
+    overlay?.classList.add('active');
+
+    // Scroll to bottom
+    const msgBox = document.getElementById('anon-chat-messages');
+    if (msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+function closeAnonymousChat() {
+    haptic();
+    const overlay = document.getElementById('anonymous-chat-overlay');
+    overlay?.classList.remove('active');
+}
+
+function openChatActionsSheet() {
+    haptic();
+    document.getElementById('chat-actions-overlay')?.classList.add('active');
+}
+
+function closeChatActionsSheet() {
+    haptic();
+    document.getElementById('chat-actions-overlay')?.classList.remove('active');
+}
+
+function nextAnonPartner() {
+    closeChatActionsSheet();
+    closeAnonymousChat();
+    haptic();
+    toggleRouletteSearch(); // Re-trigger searching
+}
+
+function reportAnonPartner() {
+    closeChatActionsSheet();
+    haptic();
+    alert('Shikoyat qabul qilindi. Ushbu foydalanuvchi tekshiruvga yuborildi.');
+    closeAnonymousChat();
+}
+
+function skipOrEndChat() {
+    haptic();
+    openChatActionsSheet();
+}
+
+function sendAnonChatMessage() {
+    const input = document.getElementById('anon-chat-input');
+    if (!input || !input.value.trim()) return;
+
+    const text = input.value.trim();
+    input.value = '';
+    haptic();
+
+    const msgContainer = document.getElementById('anon-chat-messages');
+    if (!msgContainer) return;
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Append outgoing message bubble
+    const outBubble = document.createElement('div');
+    outBubble.className = 'chat-bubble outgoing';
+    outBubble.innerHTML = `
+        <div class="bubble-content">
+            <p>${escapeHtml(text)}</p>
+            <span class="bubble-time">${timeStr} ✓✓</span>
+        </div>
+    `;
+    msgContainer.appendChild(outBubble);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    // Simulate partner response
+    setTimeout(() => {
+        const inBubble = document.createElement('div');
+        inBubble.className = 'chat-bubble incoming';
+        const partnerReplies = [
+            "Ajoyib! Qaysi sohada o'qiysiz yoki ishlaysiz? 😊",
+            "Tushundim, bo'sh vaqtingizda nimalar bilan shug'ullanasiz? ✨",
+            "Juda qiziq suhbat bo'lyapti! Qaysi shahardansiz? 🌆",
+            "Kofe ichishga vaqtingiz bo'ladimi bu hafta oxirida? ☕"
+        ];
+        const randomReply = partnerReplies[Math.floor(Math.random() * partnerReplies.length)];
+
+        inBubble.innerHTML = `
+            <div class="bubble-content">
+                <p>${randomReply}</p>
+                <span class="bubble-time">${timeStr}</span>
+            </div>
+        `;
+        msgContainer.appendChild(inBubble);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+        haptic();
+    }, 1200);
+}
+
+function handleAnonChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendAnonChatMessage();
+    }
+}
+
+function simulateMediaAttach() {
+    haptic();
+    alert('Anonim chat xavfsizligi tufayli rasm yuborish vaqtincha cheklangan.');
+}
+
+function escapeHtml(string) {
+    const div = document.createElement('div');
+    div.innerText = string;
+    return div.innerHTML;
+}
+

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\TelegramBotController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,14 +21,21 @@ Route::get('/likes', function () {
     return view('telegram_bot.mini_app.pages.likes');
 })->name('likes');
 
-// Admin Panel Views
-Route::get('/admin', function () {
-    return view('admin.pages.dashboard.index');
-})->name('admin.dashboard');
+Route::get('/roulette', function () {
+    return view('telegram_bot.mini_app.pages.roulette');
+})->name('roulette');
 
-Route::get('/login', function () {
-    return view('admin.auth.login');
-})->name('login');
+// Admin Auth Routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Protected Admin Panel Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/', function () {
+        return view('admin.pages.dashboard.index');
+    })->name('admin.dashboard');
+});
 
 // Telegram Webhook Routes (Fallback & Standard)
 Route::prefix('telegram')->group(function () {

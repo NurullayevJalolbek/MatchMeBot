@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\Like\LikeStatusEnum;
+use App\Enums\User\GenderEnum;
 use App\Models\ModelFile;
 use App\Models\User;
 use App\Models\UserLike;
@@ -22,8 +23,8 @@ class UserLikesSeeder extends Seeder
                 'first_name' => 'Jasur',
                 'name' => 'Jasur',
                 'age' => 24,
-                'gender' => 'male',
-                'looking_for' => 'female',
+                'gender' => GenderEnum::MALE->value,
+                'looking_for' => GenderEnum::FEMALE->value,
                 'city' => 'tashkent_city',
                 'onboarding_completed' => true,
                 'balance' => 0,
@@ -101,8 +102,8 @@ class UserLikesSeeder extends Seeder
                     'first_name' => $g['name'],
                     'name' => $g['name'],
                     'age' => $g['age'],
-                    'gender' => 'female',
-                    'looking_for' => 'male',
+                    'gender' => GenderEnum::FEMALE->value,
+                    'looking_for' => GenderEnum::MALE->value,
                     'city' => $g['city'],
                     'bio' => "Salom, men {$g['name']}. MatchMe'da yangiman!",
                     'onboarding_completed' => true,
