@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Contracts\iAdminUserService::class, \App\Services\AdminUserService::class);
         $this->app->singleton(\App\Contracts\iExpenseCategoryService::class, \App\Services\ExpenseCategoryService::class);
         $this->app->singleton(\App\Contracts\iIncomeCategoryService::class, \App\Services\IncomeCategoryService::class);
+        $this->app->singleton(\App\Contracts\iExpenseService::class, \App\Services\ExpenseService::class);
     }
 
     /**

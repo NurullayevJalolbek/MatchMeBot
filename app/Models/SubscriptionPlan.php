@@ -65,7 +65,7 @@ class SubscriptionPlan extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format((float) $this->price, 0, '.', ' ') . ' UZS';
+        return format_price($this->price);
     }
 
     /**
@@ -77,7 +77,7 @@ class SubscriptionPlan extends Model
             return null;
         }
 
-        return number_format((float) $this->original_price, 0, '.', ' ') . ' UZS';
+        return format_price($this->original_price);
     }
 
     /**

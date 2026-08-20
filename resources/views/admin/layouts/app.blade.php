@@ -57,6 +57,37 @@
         .swal2-actions {
             gap: 12px;
         }
+
+        /* Barcha jadvallarning thead (bosh qismi) ko'k (Primary / Qo'shish tugmasi rangida) */
+        .table thead tr,
+        .table thead th {
+            background-color: #3454d1 !important;
+            color: #ffffff !important;
+            border-color: #3454d1 !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            font-size: 11.5px;
+            letter-spacing: 0.6px;
+            vertical-align: middle;
+            padding-top: 13px !important;
+            padding-bottom: 13px !important;
+        }
+
+        .card .table thead th:first-child {
+            padding-left: 20px !important;
+        }
+
+        .card .table thead th:last-child {
+            padding-right: 20px !important;
+        }
+
+        .card .table tbody td:first-child {
+            padding-left: 20px !important;
+        }
+
+        .card .table tbody td:last-child {
+            padding-right: 20px !important;
+        }
     </style>
 
     @stack('css')
@@ -87,6 +118,67 @@
     <script src="{{ asset('assets/js/dashboard-init.min.js') }}"></script>
 
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
+
+    <!-- Global Avtomatik Narx va Summa Formatlash Scripti -->
+    <script>
+        (function ($) {
+            'use strict';
+
+            function formatPriceValue(val) {
+                if (!val && val !== 0) return '';
+                let clean = val.toString().replace(/[^\d]/g, '');
+                if (!clean) return '';
+                return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+
+            function initPriceInputs() {
+                $('.price-format, input[name="price"], input[name="original_price"], input[name="amount"]').each(function () {
+                    $(this).attr('type', 'text');
+                    $(this).attr('inputmode', 'numeric');
+                    if ($(this).val()) {
+                        $(this).val(formatPriceValue($(this).val()));
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                initPriceInputs();
+            });
+
+            // Real-time yozganda probellar bilan ajratish
+            $(document).on('input', '.price-format, input[name="price"], input[name="original_price"], input[name="amount"]', function () {
+                let originalVal = this.value;
+                let cursorPosition = this.selectionStart;
+                let digitsBeforeCursor = originalVal.slice(0, cursorPosition).replace(/[^\d]/g, '').length;
+
+                let formatted = formatPriceValue(originalVal);
+                this.value = formatted;
+
+                // Kursorni to'g'ri joyiga qaytarish
+                let newCursorPos = 0;
+                let digitCount = 0;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (/\d/.test(formatted[i])) {
+                        digitCount++;
+                    }
+                    if (digitCount === digitsBeforeCursor) {
+                        newCursorPos = i + 1;
+                        break;
+                    }
+                }
+                if (digitsBeforeCursor === 0) newCursorPos = 0;
+                this.setSelectionRange(newCursorPos, newCursorPos);
+            });
+
+            // Form yuborilganda bo'sh joylarni tozalash (backendga toza raqam borishi uchun)
+            $(document).on('submit', 'form', function () {
+                $(this).find('.price-format, input[name="price"], input[name="original_price"], input[name="amount"]').each(function () {
+                    let cleanVal = $(this).val().toString().replace(/\s+/g, '');
+                    $(this).val(cleanVal);
+                });
+            });
+        })(jQuery);
+    </script>
 
     @stack('js')
 </body>

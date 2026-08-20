@@ -39,17 +39,34 @@
                         <span class="nxl-mtext">Adminlar</span>
                     </a>
                 </li>
-                <li class="nxl-item {{ request()->routeIs('admin.income-categories*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.income-categories.index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-trending-up"></i></span>
-                        <span class="nxl-mtext">Tushum Kategoriyalari</span>
+
+                <!-- Moliya Dropdown -->
+                @php
+                    $isFinanceActive = request()->routeIs('admin.expenses*') || request()->routeIs('admin.income-categories*') || request()->routeIs('admin.expense-categories*');
+                @endphp
+                <li class="nxl-item nxl-hasmenu {{ $isFinanceActive ? 'active nxl-trigger' : '' }}">
+                    <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
+                        <span class="nxl-mtext">Moliya</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                     </a>
-                </li>
-                <li class="nxl-item {{ request()->routeIs('admin.expense-categories*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.expense-categories.index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-trending-down"></i></span>
-                        <span class="nxl-mtext">Xarajat Kategoriyalari</span>
-                    </a>
+                    <ul class="nxl-submenu" style="{{ $isFinanceActive ? 'display: block;' : '' }}">
+                        <li class="nxl-item {{ request()->routeIs('admin.expenses*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.expenses.index') }}" class="nxl-link">
+                                <span class="nxl-mtext">Xarajatlar</span>
+                            </a>
+                        </li>
+                        <li class="nxl-item {{ request()->routeIs('admin.income-categories*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.income-categories.index') }}" class="nxl-link">
+                                <span class="nxl-mtext">Tushum Kategoriyalari</span>
+                            </a>
+                        </li>
+                        <li class="nxl-item {{ request()->routeIs('admin.expense-categories*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.expense-categories.index') }}" class="nxl-link">
+                                <span class="nxl-mtext">Xarajat Kategoriyalari</span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>

@@ -61,7 +61,7 @@ class BoostPlan extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return number_format((float) $this->price, 0, '.', ' ') . ' UZS';
+        return format_price($this->price);
     }
 
     /**
@@ -69,7 +69,7 @@ class BoostPlan extends Model
      */
     public function getFormattedOriginalPriceAttribute(): ?string
     {
-        return $this->original_price ? number_format((float) $this->original_price, 0, '.', ' ') . ' UZS' : null;
+        return $this->original_price ? format_price($this->original_price) : null;
     }
 
     /**
