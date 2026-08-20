@@ -9,18 +9,13 @@
             @endif
         </ul>
     </div>
-    <div class="page-header-right ms-auto">
-        @if (isset($isIndex) && $isIndex)
-            <a href="{{ route('admin.subscription-features.create') }}" class="btn btn-primary">
-                <i class="feather-plus me-2"></i>
-                <span>Yangi Afzallik Qo'shish</span>
-            </a>
-        @else
+    @if (!isset($isIndex) || !$isIndex)
+        <div class="page-header-right ms-auto">
             <a href="{{ route('admin.subscription-features.index') }}" class="btn btn-light-brand border-0">
                 <i class="feather-arrow-left me-2"></i>
                 <span>Orqaga Qaytish</span>
             </a>
-        @endif
-    </div>
+        </div>
+    @endif
 </div>
 <!-- [ page-header ] end -->

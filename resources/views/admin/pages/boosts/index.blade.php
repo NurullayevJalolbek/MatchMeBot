@@ -22,6 +22,17 @@
     <div class="row">
         <div class="col-12">
             <div class="card stretch stretch-full">
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h5 class="card-title mb-0">Boost Rejalari</h5>
+                    <div class="card-header-action d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-light border-0" onclick="window.location.reload()" title="Yangilash">
+                            <i class="feather-rotate-cw"></i>
+                        </button>
+                        <a href="{{ route('admin.boosts.create') }}" class="btn btn-primary btn-sm px-3">
+                            <i class="feather-plus me-1"></i> Qo'shish
+                        </a>
+                    </div>
+                </div>
                 <div class="card-body custom-card-action p-0">
                     @include('admin.pages.boosts._columns', ['datas' => $boosts ?? $datas])
                 </div>
