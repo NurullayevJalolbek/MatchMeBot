@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\Boost\BoostStatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +14,8 @@ class BoostPlan extends Model
     protected $table = 'boost_plans';
 
     protected $fillable = [
+        'title',
+        'description',
         'name',
         'subtitle',
         'icon',
@@ -20,6 +24,7 @@ class BoostPlan extends Model
         'original_price',
         'badge',
         'badge_type',
+        'status',
         'is_active',
         'order',
     ];
@@ -28,17 +33,44 @@ class BoostPlan extends Model
         'hours' => 'integer',
         'price' => 'decimal:2',
         'original_price' => 'decimal:2',
+        'status' => BoostStatusEnum::class,
         'is_active' => 'boolean',
         'order' => 'integer',
     ];
 
-    public function getFormattedPriceAttribute(): string
+    /**
+     * Get display title.
+     */
+    public function getDisplayTitleAttribute(): string
     {
-        return number_format($this->price, 0, '.', ' ') . ' UZS';
+        return $this->title ?: ($this->name ?: ($this->hours . ' soatlik boost'));
     }
 
+    /**
+     * Get formatted price string.
+     */
+    public function getFormattedPriceAttribute(): string
+    {
+        return number_format((float) $this->price, 0, '.', ' ') . ' UZS';
+    }
+
+    /**
+     * Get formatted original price string.
+     */
     public function getFormattedOriginalPriceAttribute(): ?string
     {
-        return $this->original_price ? number_format($this->original_price, 0, '.', ' ') . ' UZS' : null;
+        return $this->original_price ? number_format((float) $this->original_price, 0, '.', ' ') . ' UZS' : null;
+    }
+
+    /**
+     * Scope for active plans.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', BoostStatusEnum::ACTIVE->value)
+                     ->orWhere(function ($q) {
+                         $q->whereNull('status')->where('is_active', true);
+                     })
+                     ->orderBy('order');
     }
 }

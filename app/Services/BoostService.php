@@ -3,13 +3,29 @@
 namespace App\Services;
 
 use App\Contracts\iBoostService;
+use App\Enums\Boost\BoostStatusEnum;
 use App\Models\BoostPlan;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class BoostService implements iBoostService
 {
+    /**
+     * Asosiy model klassi.
+     */
+    protected string $modelClass = BoostPlan::class;
+
+    /**
+     * Model uchun yangi query builder olish.
+     */
+    protected function query(): Builder
+    {
+        return $this->modelClass::query();
+    }
+
     /**
      * Get active boost plans from database and user current boost status.
      */
@@ -17,10 +33,11 @@ class BoostService implements iBoostService
     {
         $isBoosted = $user->boost_expires_at && Carbon::parse($user->boost_expires_at)->isFuture();
 
-        $plans = BoostPlan::where('is_active', true)
+        $plans = $this->query()
+            ->where('is_active', true)
             ->orderBy('order')
             ->get()
-            ->map(function (BoostPlan $plan) {
+            ->map(function ($plan) {
                 return [
                     'id' => $plan->id,
                     'title' => $plan->name,
@@ -50,7 +67,7 @@ class BoostService implements iBoostService
      */
     public function activateBoost(User $user, int $planId): array
     {
-        $plan = BoostPlan::where('is_active', true)->find($planId);
+        $plan = $this->query()->where('is_active', true)->find($planId);
 
         if (!$plan) {
             return [
@@ -89,5 +106,84 @@ class BoostService implements iBoostService
                 'boost_expires_at' => $newExpiry->toDateTimeString(),
             ];
         });
+    }
+
+    /**
+     * Paginate boost plans for admin management with filters.
+     */
+    public function paginateBoostPlans(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    {
+        $query = $this->query();
+
+        if (!empty($filters['search'])) {
+            $search = trim($filters['search']);
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ilike', "%{$search}%")
+                  ->orWhere('name', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->orderBy('order', 'asc')->orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    /**
+     * Create a new boost plan.
+     */
+    public function createBoostPlan(array $data): BoostPlan
+    {
+        $data['name'] = $data['title'];
+        $data['subtitle'] = $data['description'] ?? null;
+        $data['icon'] = $data['icon'] ?? '⚡';
+        $statusValue = $data['status'] instanceof BoostStatusEnum ? $data['status']->value : $data['status'];
+        $data['is_active'] = $statusValue === BoostStatusEnum::ACTIVE->value;
+        $data['order'] = $data['order'] ?? 0;
+
+        return $this->modelClass::create($data);
+    }
+
+    /**
+     * Update an existing boost plan.
+     */
+    public function updateBoostPlan(BoostPlan $boost, array $data): BoostPlan
+    {
+        $data['name'] = $data['title'];
+        $data['subtitle'] = $data['description'] ?? null;
+        $data['icon'] = $data['icon'] ?? '⚡';
+        $statusValue = $data['status'] instanceof BoostStatusEnum ? $data['status']->value : $data['status'];
+        $data['is_active'] = $statusValue === BoostStatusEnum::ACTIVE->value;
+        $data['order'] = $data['order'] ?? 0;
+
+        $boost->update($data);
+
+        return $boost;
+    }
+
+    /**
+     * Delete a boost plan.
+     */
+    public function deleteBoostPlan(BoostPlan $boost): bool
+    {
+        return (bool) $boost->delete();
+    }
+
+    /**
+     * Toggle boost plan status between active and inactive.
+     */
+    public function toggleBoostPlanStatus(BoostPlan $boost): BoostPlan
+    {
+        $currentStatus = $boost->status instanceof BoostStatusEnum ? $boost->status->value : ($boost->status ?: 'active');
+        $newStatus = ($currentStatus === BoostStatusEnum::ACTIVE->value) ? BoostStatusEnum::INACTIVE : BoostStatusEnum::ACTIVE;
+
+        $boost->update([
+            'status' => $newStatus,
+            'is_active' => $newStatus === BoostStatusEnum::ACTIVE,
+        ]);
+
+        return $boost;
     }
 }

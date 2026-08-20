@@ -31,10 +31,14 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Admin Panel Routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/', function () {
         return view('admin.pages.dashboard.index');
-    })->name('admin.dashboard');
+    })->name('dashboard');
+
+    // Boost Management Routes
+    Route::resource('boosts', \App\Http\Controllers\Admin\BoostController::class);
+    Route::post('boosts/{boost}/toggle-status', [\App\Http\Controllers\Admin\BoostController::class, 'toggleStatus'])->name('boosts.toggle');
 });
 
 // Telegram Webhook Routes (Fallback & Standard)

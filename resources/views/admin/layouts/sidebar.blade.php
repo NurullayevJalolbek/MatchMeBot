@@ -9,10 +9,16 @@
         </div>
         <div class="navbar-content">
             <ul class="nxl-navbar">
-                <li class="nxl-item {{ request()->is('admin*') ? 'active' : '' }}">
+                <li class="nxl-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <a href="{{ route('admin.dashboard') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-airplay"></i></span>
                         <span class="nxl-mtext">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nxl-item {{ request()->routeIs('admin.boosts*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.boosts.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-zap"></i></span>
+                        <span class="nxl-mtext">Boost</span>
                     </a>
                 </li>
             </ul>
