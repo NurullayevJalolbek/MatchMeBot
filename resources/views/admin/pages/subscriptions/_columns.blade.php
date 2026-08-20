@@ -22,7 +22,12 @@
                     </td>
                     <td>
                         <h6 class="fw-bold mb-1">{{ $data->title }}</h6>
-                        <small class="text-muted">{{ $data->description ?: 'Tavsif berilmagan' }}</small>
+                        @if ($data->incomeCategory)
+                            <span class="badge bg-soft-success text-success mb-1" style="font-size: 11px;">
+                                {{ $data->incomeCategory->icon }} {{ $data->incomeCategory->name }}
+                            </span>
+                        @endif
+                        <small class="text-muted d-block">{{ $data->description ?: 'Tavsif berilmagan' }}</small>
                     </td>
                     <td>
                         <div class="d-flex flex-column">

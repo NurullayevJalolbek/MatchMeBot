@@ -38,7 +38,11 @@ class BoostController extends Controller
      */
     public function create(): View
     {
-        return view('admin.pages.boosts.create');
+        $incomeCategories = \App\Models\IncomeCategory::with('children')->parents()->active()->get();
+
+        return view('admin.pages.boosts.create', [
+            'incomeCategories' => $incomeCategories,
+        ]);
     }
 
     /**
@@ -57,9 +61,12 @@ class BoostController extends Controller
      */
     public function edit(BoostPlan $boost): View
     {
+        $incomeCategories = \App\Models\IncomeCategory::with('children')->parents()->active()->get();
+
         return view('admin.pages.boosts.edit', [
             'model' => $boost,
             'boost' => $boost,
+            'incomeCategories' => $incomeCategories,
         ]);
     }
 

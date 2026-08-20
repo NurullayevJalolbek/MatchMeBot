@@ -14,6 +14,7 @@ class BoostPlan extends Model
     protected $table = 'boost_plans';
 
     protected $fillable = [
+        'income_category_id',
         'title',
         'description',
         'name',
@@ -30,6 +31,7 @@ class BoostPlan extends Model
     ];
 
     protected $casts = [
+        'income_category_id' => 'integer',
         'hours' => 'integer',
         'price' => 'decimal:2',
         'original_price' => 'decimal:2',
@@ -37,6 +39,14 @@ class BoostPlan extends Model
         'is_active' => 'boolean',
         'order' => 'integer',
     ];
+
+    /**
+     * Income category relationship.
+     */
+    public function incomeCategory(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(IncomeCategory::class, 'income_category_id');
+    }
 
     /**
      * Get display title.

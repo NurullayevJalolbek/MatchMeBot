@@ -47,7 +47,7 @@ class SubscriptionService implements iSubscriptionService
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('order', 'asc')->orderBy('id', 'desc')->paginate($perPage);
+        return $query->with('incomeCategory')->orderBy('order', 'asc')->orderBy('id', 'desc')->paginate($perPage);
     }
 
     /**

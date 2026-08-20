@@ -25,6 +25,7 @@ class SubscriptionUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'income_category_id' => ['nullable', 'integer', 'exists:income_categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'period_count' => ['required', 'integer', 'min:1', 'max:365'],
             'period_type' => ['required', Rule::enum(SubscriptionPeriodTypeEnum::class)],

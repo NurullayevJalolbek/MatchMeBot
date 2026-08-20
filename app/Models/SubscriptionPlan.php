@@ -15,6 +15,7 @@ class SubscriptionPlan extends Model
     protected $table = 'subscription_plans';
 
     protected $fillable = [
+        'income_category_id',
         'title',
         'description',
         'icon',
@@ -30,6 +31,7 @@ class SubscriptionPlan extends Model
     ];
 
     protected $casts = [
+        'income_category_id' => 'integer',
         'status' => SubscriptionStatusEnum::class,
         'period_type' => SubscriptionPeriodTypeEnum::class,
         'is_active' => 'boolean',
@@ -39,6 +41,14 @@ class SubscriptionPlan extends Model
         'days' => 'integer',
         'order' => 'integer',
     ];
+
+    /**
+     * Income category relationship.
+     */
+    public function incomeCategory(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(IncomeCategory::class, 'income_category_id');
+    }
 
     /**
      * Scope for active plans.

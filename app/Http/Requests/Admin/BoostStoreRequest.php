@@ -24,6 +24,7 @@ class BoostStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'income_category_id' => ['nullable', 'integer', 'exists:income_categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'hours' => ['required', 'integer', 'min:1', 'max:720'],
             'price' => ['required', 'numeric', 'min:0'],

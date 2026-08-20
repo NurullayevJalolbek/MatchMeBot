@@ -22,7 +22,12 @@
                     </td>
                     <td>
                         <h6 class="fw-bold mb-1">{{ $data->display_title }}</h6>
-                        <small class="text-muted">{{ $data->description ?: ($data->subtitle ?: 'Qo\'shimcha tavsif yo\'q') }}</small>
+                        @if ($data->incomeCategory)
+                            <span class="badge bg-soft-success text-success mb-1" style="font-size: 11px;">
+                                {{ $data->incomeCategory->icon }} {{ $data->incomeCategory->name }}
+                            </span>
+                        @endif
+                        <small class="text-muted d-block">{{ $data->description ?: ($data->subtitle ?: 'Qo\'shimcha tavsif yo\'q') }}</small>
                     </td>
                     <td>
                         <span class="badge bg-soft-primary text-primary fw-bold px-2.5 py-1.5">

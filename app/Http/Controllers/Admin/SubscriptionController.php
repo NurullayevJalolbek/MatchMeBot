@@ -35,7 +35,11 @@ class SubscriptionController extends Controller
      */
     public function create(): View
     {
-        return view('admin.pages.subscriptions.create');
+        $incomeCategories = \App\Models\IncomeCategory::with('children')->parents()->active()->get();
+
+        return view('admin.pages.subscriptions.create', [
+            'incomeCategories' => $incomeCategories,
+        ]);
     }
 
     /**
@@ -54,9 +58,12 @@ class SubscriptionController extends Controller
      */
     public function edit(SubscriptionPlan $subscription): View
     {
+        $incomeCategories = \App\Models\IncomeCategory::with('children')->parents()->active()->get();
+
         return view('admin.pages.subscriptions.edit', [
             'model' => $subscription,
             'subscription' => $subscription,
+            'incomeCategories' => $incomeCategories,
         ]);
     }
 
