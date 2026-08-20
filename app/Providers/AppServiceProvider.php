@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(iWalletService::class, WalletService::class);
         $this->app->singleton(iBoostService::class, BoostService::class);
         $this->app->singleton(iLikesService::class, LikesService::class);
+        $this->app->singleton(\App\Contracts\iSubscriptionService::class, \App\Services\SubscriptionService::class);
+        $this->app->singleton(\App\Contracts\iSubscriptionFeatureService::class, \App\Services\SubscriptionFeatureService::class);
     }
 
     /**

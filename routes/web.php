@@ -39,6 +39,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Boost Management Routes
     Route::resource('boosts', \App\Http\Controllers\Admin\BoostController::class);
     Route::post('boosts/{boost}/toggle-status', [\App\Http\Controllers\Admin\BoostController::class, 'toggleStatus'])->name('boosts.toggle');
+
+    // Subscription Plans Management Routes
+    Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
+    Route::post('subscriptions/{subscription}/toggle-status', [\App\Http\Controllers\Admin\SubscriptionController::class, 'toggleStatus'])->name('subscriptions.toggle');
+
+    // Subscription Features Management Routes
+    Route::resource('subscription-features', \App\Http\Controllers\Admin\SubscriptionFeatureController::class);
+    Route::post('subscription-features/{subscription_feature}/toggle-status', [\App\Http\Controllers\Admin\SubscriptionFeatureController::class, 'toggleStatus'])->name('subscription-features.toggle');
 });
 
 // Telegram Webhook Routes (Fallback & Standard)

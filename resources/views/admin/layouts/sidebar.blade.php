@@ -21,6 +21,18 @@
                         <span class="nxl-mtext">Boost</span>
                     </a>
                 </li>
+                <li class="nxl-item {{ request()->routeIs('admin.subscriptions*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.subscriptions.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-award"></i></span>
+                        <span class="nxl-mtext">Obuna Tariflari</span>
+                    </a>
+                </li>
+                <li class="nxl-item {{ request()->routeIs('admin.subscription-features*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.subscription-features.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-check-circle"></i></span>
+                        <span class="nxl-mtext">Obuna Afzalliklari</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
