@@ -25,7 +25,11 @@ class SubscriptionUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'income_category_id' => ['nullable', 'integer', 'exists:income_categories,id'],
+            'income_category_id' => [
+                'nullable', 
+                'integer', 
+                Rule::exists('income_categories', 'id')->whereNotNull('parent_id')
+            ],
             'title' => ['required', 'string', 'max:255'],
             'period_count' => ['required', 'integer', 'min:1', 'max:365'],
             'period_type' => ['required', Rule::enum(SubscriptionPeriodTypeEnum::class)],
@@ -45,6 +49,7 @@ class SubscriptionUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'income_category_id.exists' => 'Ota kategoriyani tanlash mumkin emas! Iltimos, aniq ichki (bola) tushum kategoriyasini tanlang.',
             'title.required' => 'Obuna sarlavhasini kiritish majburiy',
             'period_count.required' => 'Davomiylik miqdorini kiritish majburiy',
             'period_count.integer' => 'Davomiylik faqat butun son bo\'lishi kerak',

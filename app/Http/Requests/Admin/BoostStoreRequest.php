@@ -24,7 +24,11 @@ class BoostStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'income_category_id' => ['nullable', 'integer', 'exists:income_categories,id'],
+            'income_category_id' => [
+                'nullable', 
+                'integer', 
+                Rule::exists('income_categories', 'id')->whereNotNull('parent_id')
+            ],
             'title' => ['required', 'string', 'max:255'],
             'hours' => ['required', 'integer', 'min:1', 'max:720'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -43,6 +47,7 @@ class BoostStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'income_category_id.exists' => 'Ota kategoriyani tanlash mumkin emas! Iltimos, aniq ichki (bola) tushum kategoriyasini tanlang.',
             'title.required' => 'Boost sarlavhasini kiritish majburiy',
             'hours.required' => 'Boost davomiylik soatini kiritish majburiy',
             'hours.integer' => 'Soat faqat butun son bo\'lishi kerak',

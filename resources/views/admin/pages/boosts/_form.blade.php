@@ -125,12 +125,9 @@
                                     @if(isset($incomeCategories))
                                         @foreach($incomeCategories as $parentCat)
                                             <optgroup label="{{ $parentCat->icon }} {{ $parentCat->name }}">
-                                                <option value="{{ $parentCat->id }}" {{ old('income_category_id', $model->income_category_id) == $parentCat->id ? 'selected' : '' }}>
-                                                    {{ $parentCat->icon }} {{ $parentCat->name }} (Asosiy Guruh)
-                                                </option>
                                                 @foreach($parentCat->children as $childCat)
                                                     <option value="{{ $childCat->id }}" {{ old('income_category_id', $model->income_category_id) == $childCat->id ? 'selected' : '' }}>
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;↳ {{ $childCat->icon }} {{ $childCat->name }}
+                                                        {{ $childCat->icon }} {{ $childCat->name }}
                                                     </option>
                                                 @endforeach
                                             </optgroup>
