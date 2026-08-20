@@ -49,14 +49,14 @@
                         <span class="badge bg-light text-dark">{{ $data->order }}</span>
                     </td>
                     <td class="text-end">
-                        <div class="d-flex align-items-center justify-content-end gap-2">
-                            <a href="{{ route('admin.subscription-features.edit', $data) }}" class="btn btn-sm btn-light-brand" title="Tahrirlash">
+                        <div class="d-flex align-items-center justify-content-end gap-1">
+                            <a href="{{ route('admin.subscription-features.edit', $data) }}" class="btn btn-sm btn-soft-warning border-0" title="Tahrirlash">
                                 <i class="feather-edit-3"></i>
                             </a>
                             <button type="button" 
                                     data-url="{{ route('admin.subscription-features.destroy', $data) }}" 
                                     data-message="Haqiqatan ham ushbu Obuna afzalligini o'chirmoqchimisiz?" 
-                                    class="btn btn-sm btn-soft-danger btn-delete" 
+                                    class="btn btn-sm btn-soft-danger border-0 btn-delete" 
                                     title="O'chirish">
                                 <i class="feather-trash-2"></i>
                             </button>

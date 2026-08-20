@@ -51,4 +51,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Administrators Management Routes
     Route::resource('admins', \App\Http\Controllers\Admin\AdminUserController::class);
     Route::post('admins/{admin}/toggle-status', [\App\Http\Controllers\Admin\AdminUserController::class, 'toggleStatus'])->name('admins.toggle');
+
+    // Expense Categories Management Routes
+    Route::resource('expense-categories', \App\Http\Controllers\Admin\ExpenseCategoryController::class);
+    Route::post('expense-categories/{expense_category}/toggle-status', [\App\Http\Controllers\Admin\ExpenseCategoryController::class, 'toggleStatus'])->name('expense-categories.toggle');
 });

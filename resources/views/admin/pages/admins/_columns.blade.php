@@ -59,15 +59,15 @@
                         <small class="text-muted">{{ $data->created_at ? $data->created_at->format('d.m.Y H:i') : '—' }}</small>
                     </td>
                     <td class="text-end">
-                        <div class="d-flex align-items-center justify-content-end gap-2">
-                            <a href="{{ route('admin.admins.edit', $data) }}" class="btn btn-sm btn-light-brand" title="Tahrirlash">
+                        <div class="d-flex align-items-center justify-content-end gap-1">
+                            <a href="{{ route('admin.admins.edit', $data) }}" class="btn btn-sm btn-soft-warning border-0" title="Tahrirlash">
                                 <i class="feather-edit-3"></i>
                             </a>
                             @if (!$isSelf)
                                 <button type="button" 
                                         data-url="{{ route('admin.admins.destroy', $data) }}" 
                                         data-message="Haqiqatan ham ushbu Administratorni o'chirmoqchimisiz?" 
-                                        class="btn btn-sm btn-soft-danger btn-delete" 
+                                        class="btn btn-sm btn-soft-danger border-0 btn-delete" 
                                         title="O'chirish">
                                     <i class="feather-trash-2"></i>
                                 </button>

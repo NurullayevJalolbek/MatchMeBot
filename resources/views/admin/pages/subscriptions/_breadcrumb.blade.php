@@ -1,13 +1,10 @@
 <!-- [ page-header ] start -->
 <div class="page-header">
     <div class="page-header-left d-flex align-items-center">
-        <div class="page-header-title">
-            <h5 class="m-b-10">{{ $title ?? ($label ?? 'Obunalar') }}</h5>
-        </div>
-        <ul class="breadcrumb">
+        <ul class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Asosiy</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.index') }}">Obunalar</a></li>
-            @if (isset($label) || (isset($title) && $title !== 'Obunalar' && $title !== 'Obunalar Boshqaruvi'))
+            <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.index') }}">Obuna Tariflari</a></li>
+            @if (isset($label) || (isset($title) && $title !== 'Obunalar' && $title !== 'Obuna Tariflari' && $title !== 'Obunalar Boshqaruvi'))
                 <li class="breadcrumb-item active">{{ $label ?? $title }}</li>
             @endif
         </ul>
@@ -19,7 +16,7 @@
                 <span>Yangi Obuna Qo'shish</span>
             </a>
         @else
-            <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-light-brand">
+            <a href="{{ route('admin.subscriptions.index') }}" class="btn btn-light-brand border-0">
                 <i class="feather-arrow-left me-2"></i>
                 <span>Orqaga Qaytish</span>
             </a>

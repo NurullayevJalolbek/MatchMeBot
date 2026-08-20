@@ -39,6 +39,12 @@
                         <span class="nxl-mtext">Adminlar</span>
                     </a>
                 </li>
+                <li class="nxl-item {{ request()->routeIs('admin.expense-categories*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.expense-categories.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-trending-down"></i></span>
+                        <span class="nxl-mtext">Xarajat Kategoriyalari</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
