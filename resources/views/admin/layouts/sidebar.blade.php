@@ -33,6 +33,12 @@
                         <span class="nxl-mtext">Obuna Afzalliklari</span>
                     </a>
                 </li>
+                <li class="nxl-item {{ request()->routeIs('admin.admins*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.admins.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-shield"></i></span>
+                        <span class="nxl-mtext">Adminlar</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

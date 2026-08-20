@@ -20,13 +20,25 @@ class AdminMiddleware
             return redirect()->route('login');
         }
 
-        if (!Auth::user()->isAdmin()) {
+        $user = Auth::user();
+
+        if (!$user->isAdmin()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
                 'email' => 'Sizda admin panelga kirish huquqi mavjud emas!',
+            ]);
+        }
+
+        if ($user->status === \App\Enums\Admin\AdminStatusEnum::BLOCKED) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Sizning profilingiz bloklangan! Administratorga murojaat qiling.',
             ]);
         }
 

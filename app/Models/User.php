@@ -42,6 +42,7 @@ class User extends Authenticatable
         'terms_accepted_at',
         'email',
         'password',
+        'status',
     ];
 
     /**
@@ -79,7 +80,18 @@ class User extends Authenticatable
             'terms_accepted_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => \App\Enums\Admin\AdminStatusEnum::class,
         ];
+    }
+
+    /**
+     * Scope a query to only include admins.
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->whereHas('roles', function ($q) {
+            $q->where('code', \App\Enums\User\RoleEnum::ADMIN->value);
+        });
     }
 
     /**

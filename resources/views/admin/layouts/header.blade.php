@@ -39,23 +39,6 @@
                     </div>
                 </div>
 
-                <div class="nxl-h-item nxl-header-language d-none d-sm-flex">
-                    <div class="header-language-inline">
-                        <a href="javascript:void(0);" class="lang-item active" title="Uzbek">
-                            <img src="{{ asset('assets/vendors/img/flags/4x3/uz.svg') }}" alt="UZ" />
-                            <span>O'Z</span>
-                        </a>
-                        <a href="javascript:void(0);" class="lang-item" title="Russian">
-                            <img src="{{ asset('assets/vendors/img/flags/4x3/ru.svg') }}" alt="RU" />
-                            <span>РУ</span>
-                        </a>
-                        <a href="javascript:void(0);" class="lang-item" title="English">
-                            <img src="{{ asset('assets/vendors/img/flags/4x3/gb.svg') }}" alt="EN" />
-                            <span>EN</span>
-                        </a>
-                    </div>
-                </div>
-                
                 <div class="nxl-h-item d-none d-sm-flex">
                     <div class="full-screen-switcher">
                         <a href="javascript:void(0);" class="nxl-head-link me-0" onclick="$('body').fullScreenHelper('toggle');">
@@ -207,48 +190,6 @@
         padding: 0 14px;
     }
 
-    .nxl-header .header-language-inline {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px;
-        border-radius: 999px;
-        background: #f3f4f6;
-    }
-
-    .nxl-header .header-language-inline .lang-item {
-        height: 30px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        gap: 6px;
-        padding: 2px 10px 2px 8px;
-        color: #334155;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .03em;
-        transition: all .2s ease;
-    }
-
-    .nxl-header .header-language-inline .lang-item img {
-        width: 20px;
-        height: 14px;
-        object-fit: cover;
-        border-radius: 3px;
-        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .25);
-    }
-
-    .nxl-header .header-language-inline .lang-item:hover {
-        background: #e5e7eb;
-    }
-
-    .nxl-header .header-language-inline .lang-item.active {
-        color: #0f172a;
-        background: #ffffff;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, .12);
-    }
-
     [data-theme="dark"] .nxl-header,
     .app-skin-dark .nxl-header,
     .app-dark .nxl-header,
@@ -256,15 +197,6 @@
     body.dark .nxl-header {
         background: #111827 !important;
         border-bottom-color: #1f2937 !important;
-    }
-
-    [data-theme="dark"] .nxl-header .header-language-inline,
-    .app-skin-dark .nxl-header .header-language-inline,
-    .app-dark .nxl-header .header-language-inline,
-    .dark-theme .nxl-header .header-language-inline,
-    body.dark .nxl-header .header-language-inline {
-        background: #0f172a !important;
-        border: 1px solid #1b2436;
     }
 
     [data-theme="dark"] .nxl-header .rates-marquee,

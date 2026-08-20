@@ -47,12 +47,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Subscription Features Management Routes
     Route::resource('subscription-features', \App\Http\Controllers\Admin\SubscriptionFeatureController::class);
     Route::post('subscription-features/{subscription_feature}/toggle-status', [\App\Http\Controllers\Admin\SubscriptionFeatureController::class, 'toggleStatus'])->name('subscription-features.toggle');
-});
 
-// Telegram Webhook Routes (Fallback & Standard)
-Route::prefix('telegram')->group(function () {
-    Route::post('/webhook', [TelegramBotController::class, 'handleWebhook'])->name('telegram.webhook');
-    Route::get('/set-webhook', [TelegramBotController::class, 'setWebhook'])->name('telegram.set_webhook');
-    Route::get('/delete-webhook', [TelegramBotController::class, 'deleteWebhook'])->name('telegram.delete_webhook');
-    Route::get('/webhook-info', [TelegramBotController::class, 'getWebhookInfo'])->name('telegram.webhook_info');
+    // Administrators Management Routes
+    Route::resource('admins', \App\Http\Controllers\Admin\AdminUserController::class);
+    Route::post('admins/{admin}/toggle-status', [\App\Http\Controllers\Admin\AdminUserController::class, 'toggleStatus'])->name('admins.toggle');
 });
