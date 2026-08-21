@@ -8,7 +8,7 @@
         <div class="progress-fill" style="width: 66.6%;"></div>
     </div>
 
-    <h2 class="step-heading">Shahringizni tanlang 📍</h2>
+    <h2 class="step-heading">Shahringizni tanlang</h2>
     <p class="step-subheading">Yaqiningizdagi insonlar bilan tanishing.</p>
 
     <div class="form-group">
@@ -23,7 +23,7 @@
     </div>
 
     <button class="btn-geo" onclick="detectGeolocation()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="7"></circle>
             <line x1="12" y1="1" x2="12" y2="4"></line>
             <line x1="12" y1="20" x2="12" y2="23"></line>
@@ -35,7 +35,7 @@
 
     <div class="button-row">
         <button class="btn-back" onclick="goToStep(3)">
-            ⬅ Orqaga
+            Orqaga
         </button>
         <button class="btn-primary" onclick="submitStep4()">
             Davom etish ➔

@@ -23,6 +23,40 @@
     <!-- Canvas Confetti for Celebration -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background-color: #0c0e17;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            height: 100dvh;
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+            background-color: #0c0e17;
+        }
+        .app-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+        }
+    </style>
+
     @stack('styles')
 </head>
 <body>
@@ -45,7 +79,6 @@
 {{-- Universal Modals --}}
 @include('telegram_bot.mini_app.partials.modals')
 @include('telegram_bot.mini_app.partials.filter-modal')
-@include('telegram_bot.mini_app.partials.wallet-modal')
 @include('telegram_bot.mini_app.partials.boost-modal')
 @include('telegram_bot.mini_app.partials.vip-modal')
 

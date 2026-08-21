@@ -25,16 +25,10 @@ if (tg) {
     tg.ready();
     tg.expand();
     try {
-        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#000000');
-        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#000000');
-        if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#000000');
-        if (typeof tg.requestFullscreen === 'function') tg.requestFullscreen();
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#0c0e17');
+        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#0c0e17');
+        if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#0c0e17');
     } catch (e) {}
-}
-
-// Instant redirect if user already completed onboarding
-if ((window.location.pathname === '/' || window.location.pathname === '/app') && localStorage.getItem('matchme_onboarding_completed') === 'true') {
-    window.location.replace('/discovery');
 }
 
 // On Page Load
@@ -76,12 +70,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isCompleted) {
                 localStorage.setItem('matchme_onboarding_completed', 'true');
-            }
-
-            // If onboarding is completed and user is on welcome/register page, jump straight to Discovery!
-            if (isCompleted && (currentPath === '/' || currentPath === '/app')) {
-                window.location.replace('/discovery');
-                return;
+                // If onboarding is completed and user is on welcome/register page, jump straight to Discovery!
+                if (currentPath === '/' || currentPath === '/app') {
+                    window.location.replace('/discovery');
+                    return;
+                }
+            } else {
+                localStorage.removeItem('matchme_onboarding_completed');
+                // If onboarding is NOT completed and user is on discovery page, redirect to onboarding!
+                if (currentPath === '/discovery') {
+                    window.location.replace('/');
+                    return;
+                }
             }
 
             if (data.data.user.name) {
@@ -150,23 +150,8 @@ function toggleTerms() {
     }
 }
 
-async function startOnboarding() {
-    if (!state.isTermsAccepted) return;
+function startOnboarding() {
     haptic();
-
-    // Save terms to DB
-    try {
-        await fetch('/api/onboarding/terms', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'lang': 'uz'
-            },
-            body: JSON.stringify({ user_id: state.userId })
-        });
-    } catch (e) {}
-
     goToStep(1);
 }
 

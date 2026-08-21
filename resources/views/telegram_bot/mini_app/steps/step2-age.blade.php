@@ -8,8 +8,8 @@
         <div class="progress-fill" style="width: 33.3%;"></div>
     </div>
 
-    <h2 class="step-heading">Yoshingiz nechida? 🎂</h2>
-    <p class="step-subheading">Faqat 18 yoshdan kattalar uchun xizmat.</p>
+    <h2 class="step-heading">Yoshingiz nechida?</h2>
+    <p class="step-subheading">Faqat 18 yoshdan oshgan foydalanuvchilar uchun.</p>
 
     <div class="form-group">
         <label class="form-label">Tug'ilgan sanangiz</label>
@@ -23,7 +23,7 @@
 
     <div class="button-row">
         <button class="btn-back" onclick="goToStep(1)">
-            ⬅ Orqaga
+            Orqaga
         </button>
         <button class="btn-primary" id="btn-submit-step2" onclick="submitStep2()">
             Davom etish ➔

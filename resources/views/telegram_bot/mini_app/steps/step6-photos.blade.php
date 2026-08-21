@@ -8,7 +8,7 @@
         <div class="progress-fill" style="width: 100%;"></div>
     </div>
 
-    <h2 class="step-heading">Suratlaringizni yuklang 📸</h2>
+    <h2 class="step-heading">Suratlaringizni yuklang</h2>
     <p class="step-subheading">Kamida 1 ta, ko'pi bilan 3 ta sifatli suratingizni joylang.</p>
 
     <div class="photo-grid">
@@ -32,10 +32,10 @@
 
     <div class="button-row">
         <button class="btn-back" onclick="goToStep(5)">
-            ⬅ Orqaga
+            Orqaga
         </button>
         <button class="btn-primary" id="btn-submit-step6" onclick="submitStep6()">
-            Profilni Yakunlash 🎉
+            Profilni Yakunlash
         </button>
     </div>
 </section>

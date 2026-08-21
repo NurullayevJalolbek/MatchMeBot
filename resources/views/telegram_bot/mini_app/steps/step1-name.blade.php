@@ -8,7 +8,7 @@
         <div class="progress-fill" style="width: 16.6%;"></div>
     </div>
 
-    <h2 class="step-heading">Ismingiz nima? ✨</h2>
+    <h2 class="step-heading">Ismingiz nima?</h2>
     <p class="step-subheading">Bu ism profilingizda boshqalarga ko'rinadi.</p>
 
     <div class="form-group">

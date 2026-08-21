@@ -29,7 +29,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(iTelegramUserService::class, TelegramUserService::class);
         $this->app->singleton(iOnboardingService::class, OnboardingService::class);
         $this->app->singleton(iDiscoveryService::class, DiscoveryService::class);
-        $this->app->singleton(iWalletService::class, WalletService::class);
         $this->app->singleton(iBoostService::class, BoostService::class);
         $this->app->singleton(iLikesService::class, LikesService::class);
         $this->app->singleton(\App\Contracts\iSubscriptionService::class, \App\Services\SubscriptionService::class);

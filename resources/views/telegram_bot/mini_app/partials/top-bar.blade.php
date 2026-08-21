@@ -1,4 +1,4 @@
-<!-- Top Header Bar with Logo, Daily Bonus, and Balance -->
+<!-- Top Header Bar with Logo and MatchMe Brand -->
 <header class="app-top-bar">
     <div class="top-brand-box">
         <div class="top-logo-badge">
@@ -13,18 +13,10 @@
     </div>
 
     <div class="top-actions-box">
-        <!-- Daily Streak / Bonus Pill -->
-        <div class="top-streak-pill" onclick="openBonusModal()">
-            <span class="streak-icon">🎁</span>
-            <span class="streak-text" id="header-streak-text">1-Kun</span>
-            <span class="streak-dot"></span>
-        </div>
-
-        <!-- Balance Pill -->
-        <div class="top-balance-pill" onclick="openBalanceModal()">
-            <span class="balance-icon">🪙</span>
-            <span class="balance-text" id="header-balance-text">0 <small>UZS</small></span>
-            <button class="balance-plus-btn">+</button>
-        </div>
+        <!-- VIP Subscription Button -->
+        <button type="button" class="btn-vip-header-pill" onclick="openVipModal()">
+            <span class="vip-header-icon">👑</span>
+            <span class="vip-header-text">VIP</span>
+        </button>
     </div>
 </header>

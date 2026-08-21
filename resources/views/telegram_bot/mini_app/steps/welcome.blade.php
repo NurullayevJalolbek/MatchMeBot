@@ -8,23 +8,12 @@
         <div class="hero-content">
             <div class="hero-tag">MATCHME DATING</div>
             <h2 class="hero-title">O'z baxtingizni <span class="accent-bugun">Bugun</span> Toping</h2>
-            <p class="hero-description">Platformamizdan o'z baxtingiz va haqiqiy muhabbatingizni topsangiz, biz bundan faqat xursand bo'lamiz ✨</p>
+            <p class="hero-description">MatchMe orqali yangi do'stlar, qiziqarli insonlar va haqiqiy muhabbatingizni toping ✨</p>
         </div>
     </div>
 
-    <div class="checkbox-container" id="terms-box" onclick="toggleTerms()">
-        <div class="custom-checkbox" id="terms-checkbox">
-            <svg viewBox="0 0 24 24">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </div>
-        <div class="checkbox-label">
-            Men <a onclick="event.stopPropagation(); openTermsModal()">Foydalanish Qoidalari</a> va <a onclick="event.stopPropagation(); openPrivacyModal()">Xavfsizlik</a> siyosatiga roziman
-        </div>
-    </div>
-
-    <div class="button-row" style="padding-top: 0;">
-        <button id="btn-start-welcome" class="btn-primary disabled" onclick="startOnboarding()" disabled>
+    <div class="button-row" style="padding-top: 10px;">
+        <button id="btn-start-welcome" class="btn-primary" onclick="startOnboarding()">
             Tanishuvni Boshlash ➔
         </button>
     </div>

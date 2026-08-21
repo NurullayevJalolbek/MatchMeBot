@@ -21,10 +21,6 @@ Route::get('/likes', function () {
     return view('telegram_bot.mini_app.pages.likes');
 })->name('likes');
 
-Route::get('/roulette', function () {
-    return view('telegram_bot.mini_app.pages.roulette');
-})->name('roulette');
-
 // Admin Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
