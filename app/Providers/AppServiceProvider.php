@@ -38,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Contracts\iExpenseCategoryService::class, \App\Services\ExpenseCategoryService::class);
         $this->app->singleton(\App\Contracts\iIncomeCategoryService::class, \App\Services\IncomeCategoryService::class);
         $this->app->singleton(\App\Contracts\iExpenseService::class, \App\Services\ExpenseService::class);
+        $this->app->singleton(\App\Contracts\iPaymentService::class, \App\Services\PaymentService::class);
+        $this->app->singleton(\App\Contracts\iProfileOptionService::class, \App\Services\ProfileOptionService::class);
     }
 
     /**
@@ -45,6 +47,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
     }
 }

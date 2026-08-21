@@ -109,47 +109,26 @@
             }).then((result) => {
                 const isConfirmed = result === true || (result && (result.isConfirmed === true || result.value === true));
                 if (isConfirmed) {
-                    const token = $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}';
-
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        data: {
-                            _method: 'DELETE',
-                            _token: token
-                        },
-                        success: function (response) {
-                            if (response && response.success) {
+                    axios.delete(url)
+                        .then(function (response) {
+                            if (response.data && response.data.success) {
                                 Toast.fire({
                                     icon: 'success',
-                                    title: response.message || "Xarajat muvaffaqiyatli o'chirildi!"
+                                    title: response.data.message || "Xarajat muvaffaqiyatli o'chirildi!"
                                 });
                                 const $row = $btn.closest('tr');
                                 $row.fadeOut(350, function () {
                                     $(this).remove();
                                 });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Xatolik',
-                                    text: response.message || 'O\'chirishda xatolik yuz berdi'
-                                });
                             }
-                        },
-                        error: function (xhr) {
-                            let errorMsg = "O'chirishda xatolik yuz berdi";
-                            try {
-                                const res = JSON.parse(xhr.responseText);
-                                if (res.message) errorMsg = res.message;
-                            } catch (e) {}
-
+                        })
+                        .catch(function (error) {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Xatolik',
-                                text: errorMsg
+                                text: error.response?.data?.message || 'O\'chirishda xatolik yuz berdi'
                             });
-                        }
-                    });
+                        });
                 }
             });
         });

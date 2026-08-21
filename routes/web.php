@@ -63,4 +63,24 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // Expenses Management Routes
     Route::resource('expenses', \App\Http\Controllers\Admin\ExpenseController::class);
     Route::post('expenses/{expense}/toggle-status', [\App\Http\Controllers\Admin\ExpenseController::class, 'toggleStatus'])->name('expenses.toggle');
+
+    // Payments (Tushumlar) Management Routes
+    Route::get('payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('payments/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show');
+    Route::post('payments/{payment}/approve', [\App\Http\Controllers\Admin\PaymentController::class, 'approve'])->name('payments.approve');
+    Route::post('payments/{payment}/reject', [\App\Http\Controllers\Admin\PaymentController::class, 'reject'])->name('payments.reject');
+    Route::delete('payments/{payment}', [\App\Http\Controllers\Admin\PaymentController::class, 'destroy'])->name('payments.destroy');
+
+    // Xizmatlar Tarixi (User Subscriptions & Boosts History) Routes
+    Route::get('user-subscriptions', [\App\Http\Controllers\Admin\UserSubscriptionController::class, 'index'])->name('user-subscriptions.index');
+    Route::post('user-subscriptions/{user_subscription}/cancel', [\App\Http\Controllers\Admin\UserSubscriptionController::class, 'cancel'])->name('user-subscriptions.cancel');
+    Route::delete('user-subscriptions/{user_subscription}', [\App\Http\Controllers\Admin\UserSubscriptionController::class, 'destroy'])->name('user-subscriptions.destroy');
+
+    Route::get('user-boosts', [\App\Http\Controllers\Admin\UserBoostController::class, 'index'])->name('user-boosts.index');
+    Route::post('user-boosts/{user_boost}/cancel', [\App\Http\Controllers\Admin\UserBoostController::class, 'cancel'])->name('user-boosts.cancel');
+    Route::delete('user-boosts/{user_boost}', [\App\Http\Controllers\Admin\UserBoostController::class, 'destroy'])->name('user-boosts.destroy');
+
+    // Ma'lumotnomalar (Profile Options) Management Routes
+    Route::resource('profile-options', \App\Http\Controllers\Admin\ProfileOptionController::class);
+    Route::post('profile-options/{profile_option}/toggle-status', [\App\Http\Controllers\Admin\ProfileOptionController::class, 'toggleStatus'])->name('profile-options.toggle');
 });

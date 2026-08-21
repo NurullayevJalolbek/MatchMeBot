@@ -88,6 +88,48 @@
         .card .table tbody td:last-child {
             padding-right: 20px !important;
         }
+
+        /* Sidebar Submenu miltillash (flicker) ning oldini olish */
+        .nxl-navbar .nxl-item.nxl-hasmenu:not(.nxl-trigger) > .nxl-submenu {
+            display: none !important;
+        }
+        .nxl-navbar .nxl-item.nxl-hasmenu.nxl-trigger > .nxl-submenu {
+            display: block !important;
+        }
+
+        /* Clean and sleek Bootstrap 5 Pagination */
+        .pagination {
+            margin-bottom: 0;
+            gap: 4px;
+        }
+        .page-item .page-link {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            font-weight: 500;
+            font-size: 13px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            box-shadow: none;
+        }
+        .page-item.active .page-link {
+            background-color: #3454d1 !important;
+            border-color: #3454d1 !important;
+            color: #ffffff !important;
+        }
+        .page-item.disabled .page-link {
+            background-color: #f8fafc;
+            color: #94a3b8;
+            border-color: #e2e8f0;
+        }
+        .page-item .page-link:hover:not(.disabled) {
+            background-color: #f1f5f9;
+            color: #3454d1;
+        }
     </style>
 
     @stack('css')
@@ -118,6 +160,18 @@
     <script src="{{ asset('assets/js/dashboard-init.min.js') }}"></script>
 
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Axios Global CSRF Setup
+        if (window.axios) {
+            window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                window.axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken.getAttribute('content');
+            }
+        }
+    </script>
 
     <!-- Global Avtomatik Narx va Summa Formatlash Scripti -->
     <script>

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionFeatureSeeder::class,
             BoostPlanSeeder::class,
             SubscriptionPlanSeeder::class,
-            ExpenseSeeder::class,
+            ProfileOptionSeeder::class,
             UserLikesSeeder::class,
         ]);
     }
