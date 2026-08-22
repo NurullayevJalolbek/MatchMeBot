@@ -56,8 +56,6 @@ class BoostService implements iBoostService
         return [
             'is_boosted' => (bool) $isBoosted,
             'boost_expires_at' => $user->boost_expires_at,
-            'balance' => (float) ($user->balance ?? 0),
-            'formatted_balance' => number_format((float) ($user->balance ?? 0), 0, '.', ' ') . ' UZS',
             'plans' => $plans,
         ];
     }

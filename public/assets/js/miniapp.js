@@ -126,10 +126,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-function haptic() {
-    if (tg?.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('medium');
-    }
+function haptic(style = 'medium') {
+    try {
+        if (tg && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast('6.1') && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred(style);
+        }
+    } catch (e) {}
 }
 
 // Terms toggle
@@ -264,19 +266,47 @@ function detectGeolocation() {
             state.latitude = lat;
             state.longitude = lng;
 
+            // Accurate bounding boxes for each Uzbekistan region
+            // Format: [minLat, maxLat, minLng, maxLng]
+            const regions = [
+                { city: 'tashkent_city',  minLat: 41.15, maxLat: 41.50, minLng: 69.10, maxLng: 69.55 },
+                { city: 'tashkent_region',minLat: 40.60, maxLat: 41.80, minLng: 68.70, maxLng: 70.30 },
+                { city: 'sirdaryo',       minLat: 40.20, maxLat: 41.00, minLng: 67.80, maxLng: 70.00 },
+                { city: 'jizzakh',        minLat: 39.80, maxLat: 40.80, minLng: 65.90, maxLng: 68.80 },
+                { city: 'samarkand',      minLat: 38.80, maxLat: 40.20, minLng: 65.60, maxLng: 67.80 },
+                { city: 'kashkadarya',    minLat: 38.00, maxLat: 39.70, minLng: 65.00, maxLng: 67.50 },
+                { city: 'surkhandarya',   minLat: 37.00, maxLat: 38.60, minLng: 66.80, maxLng: 68.80 },
+                { city: 'namangan',       minLat: 40.70, maxLat: 41.80, minLng: 70.50, maxLng: 72.00 },
+                { city: 'andijan',        minLat: 40.50, maxLat: 41.20, minLng: 71.80, maxLng: 73.20 },
+                { city: 'fergana',        minLat: 39.90, maxLat: 40.90, minLng: 70.60, maxLng: 72.20 },
+                { city: 'navoi',          minLat: 39.50, maxLat: 41.50, minLng: 62.00, maxLng: 66.50 },
+                { city: 'bukhara',        minLat: 38.50, maxLat: 40.40, minLng: 62.00, maxLng: 65.50 },
+                { city: 'khorezm',        minLat: 41.00, maxLat: 42.00, minLng: 59.80, maxLng: 62.00 },
+                { city: 'karakalpakstan', minLat: 42.00, maxLat: 45.50, minLng: 55.00, maxLng: 62.00 },
+            ];
+
+            // Find best matching region (point-in-box check)
             let detectedCity = 'tashkent_city';
-            if (lat < 38.5) detectedCity = 'surkhandarya';
-            else if (lat < 39.5 && lng < 67) detectedCity = 'kashkadarya';
-            else if (lng < 62) detectedCity = 'karakalpakstan';
-            else if (lng < 63) detectedCity = 'khorezm';
-            else if (lng < 65) detectedCity = 'bukhara';
-            else if (lng < 66) detectedCity = 'navoi';
-            else if (lng < 68) detectedCity = 'samarkand';
-            else if (lng < 69.5) detectedCity = 'jizzakh';
-            else if (lng > 71.5) detectedCity = 'andijan';
-            else if (lng > 71) detectedCity = 'namangan';
-            else if (lng > 70.5) detectedCity = 'fergana';
-            else detectedCity = 'tashkent_city';
+            for (const r of regions) {
+                if (lat >= r.minLat && lat <= r.maxLat && lng >= r.minLng && lng <= r.maxLng) {
+                    detectedCity = r.city;
+                    break;
+                }
+            }
+
+            // Fallback: find nearest region center if no exact match
+            if (detectedCity === 'tashkent_city' && regions[0].city !== 'tashkent_city') {
+                let minDist = Infinity;
+                for (const r of regions) {
+                    const centerLat = (r.minLat + r.maxLat) / 2;
+                    const centerLng = (r.minLng + r.maxLng) / 2;
+                    const dist = Math.pow(lat - centerLat, 2) + Math.pow(lng - centerLng, 2);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        detectedCity = r.city;
+                    }
+                }
+            }
 
             const citySelect = document.getElementById('input-city');
             if (citySelect) {
@@ -288,7 +318,18 @@ function detectGeolocation() {
         },
         (err) => {
             geoText.innerText = 'Geolokatsiyani avto-aniqlash';
-            alert('Geolokatsiyaga ruxsat berilmadi. Shaharni ro\'yxatdan tanlang.');
+            if (err.code === 1) {
+                alert('Geolokatsiyaga ruxsat berilmadi. Iltimos, shaharni ro\'yxatdan o\'zingiz tanlang.');
+            } else if (err.code === 2) {
+                alert('Lokatsiya aniqlanmadi. Internet aloqasini tekshiring.');
+            } else {
+                alert('Geolokatsiya xatosi. Shaharni ro\'yxatdan tanlang.');
+            }
+        },
+        {
+            enableHighAccuracy: true,   // GPS ishlatadi, aniqroq
+            timeout: 10000,             // 10 soniya kutadi
+            maximumAge: 60000           // 1 daqiqa kesh
         }
     );
 }
@@ -322,6 +363,20 @@ async function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Instant local preview
+    const localPreviewUrl = URL.createObjectURL(file);
+    const slotIdx = state.currentSlotUploading || 0;
+    const targetSlot = document.getElementById(`photo-slot-${slotIdx}`);
+    if (targetSlot) {
+        targetSlot.className = 'photo-slot has-image';
+        targetSlot.innerHTML = `
+            <img src="${localPreviewUrl}" alt="Photo ${slotIdx + 1}" style="opacity: 0.7;">
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 18px;">
+                <div style="width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            </div>
+        `;
+    }
+
     const formData = new FormData();
     formData.append('photo', file);
     if (state.userId) {
@@ -341,9 +396,13 @@ async function handlePhotoUpload(e) {
         const data = await res.json();
         if (data.status && data.data?.photos) {
             renderPhotoSlots(data.data.photos);
+        } else if (data.message) {
+            if (window.showToast) window.showToast(data.message);
+            renderPhotoSlots(state.photos);
         }
     } catch (err) {
         console.log('Upload error:', err);
+        renderPhotoSlots(state.photos);
     }
 
     e.target.value = '';
@@ -355,10 +414,23 @@ function renderPhotoSlots(photos = []) {
         const slot = document.getElementById(`photo-slot-${i}`);
         if (!slot) continue;
 
-        if (photos[i]) {
+        const rawItem = photos[i];
+        let photoUrl = '';
+        if (typeof rawItem === 'object' && rawItem !== null) {
+            photoUrl = rawItem.url || rawItem.file_path || '';
+        } else if (typeof rawItem === 'string') {
+            photoUrl = rawItem;
+        }
+
+        // Clean localhost/127.0.0.1 domain if present
+        if (photoUrl.startsWith('http://localhost') || photoUrl.startsWith('http://127.0.0.1')) {
+            photoUrl = photoUrl.replace(/^https?:\/\/[^\/]+/, '');
+        }
+
+        if (photoUrl) {
             slot.className = 'photo-slot has-image';
             slot.innerHTML = `
-                <img src="${photos[i]}" alt="Photo ${i+1}">
+                <img src="${photoUrl}" alt="Photo ${i+1}">
                 <div class="photo-slot-delete" onclick="event.stopPropagation(); deletePhoto(${i})">&times;</div>
             `;
         } else {
@@ -542,197 +614,6 @@ function openBonusModal() {
     haptic();
 }
 
-// ==================== WALLET & DEPOSIT LOGIC ====================
-let selectedDepositFile = null;
-
-function openBalanceModal() {
-    haptic();
-    const modal = document.getElementById('wallet-modal-overlay');
-    if (!modal) return;
-
-    // Fetch user balance
-    if (state.userId) {
-        fetch(`/api/wallet/balance?user_id=${state.userId}`, {
-            headers: { 'lang': 'uz' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.status && res.data) {
-                const balEl = document.getElementById('modal-current-balance');
-                if (balEl) balEl.innerText = `Balans: ${res.data.formatted_balance}`;
-                if (res.data.card_number) {
-                    const cardEl = document.getElementById('wallet-card-number');
-                    if (cardEl) cardEl.innerText = res.data.card_number;
-                }
-            }
-        })
-        .catch(e => console.log('Wallet load error:', e));
-    }
-
-    modal.classList.add('active');
-    checkDepositValidity();
-}
-
-function closeWalletModal(e) {
-    if (e) e.stopPropagation();
-    haptic();
-    const modal = document.getElementById('wallet-modal-overlay');
-    if (modal) modal.classList.remove('active');
-}
-
-function checkDepositValidity() {
-    const amountInput = document.getElementById('input-deposit-amount');
-    const amount = parseFloat(amountInput ? amountInput.value : 0);
-    const btn = document.getElementById('btn-submit-deposit');
-
-    const isValid = amount >= 1000 && selectedDepositFile !== null;
-
-    if (btn) {
-        btn.disabled = !isValid;
-        btn.classList.toggle('disabled', !isValid);
-    }
-}
-
-function selectPresetAmount(amount) {
-    haptic();
-    const input = document.getElementById('input-deposit-amount');
-    if (input) input.value = amount;
-
-    document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`preset-${amount}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    checkDepositValidity();
-}
-
-function onCustomAmountChange(val) {
-    const num = parseInt(val, 10);
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.id === `preset-${num}`);
-    });
-
-    checkDepositValidity();
-}
-
-function copyCardNumber() {
-    haptic();
-    const cardEl = document.getElementById('wallet-card-number');
-    const cardText = (cardEl ? cardEl.innerText : '5614 6819 1495 1557').replace(/\s+/g, '');
-    
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(cardText).catch(() => {});
-    }
-
-    const copyBtn = document.querySelector('.btn-copy-card');
-    if (copyBtn) {
-        const originalHtml = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<span>✔ Nusxalandi!</span>';
-        setTimeout(() => { copyBtn.innerHTML = originalHtml; }, 1800);
-    }
-}
-
-function triggerReceiptFileSelect() {
-    haptic();
-    document.getElementById('input-receipt-file')?.click();
-}
-
-function handleReceiptFileSelected(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    selectedDepositFile = file;
-
-    const emptyView = document.getElementById('receipt-empty-view');
-    const previewView = document.getElementById('receipt-preview-view');
-    const previewImg = document.getElementById('receipt-preview-img');
-    const nameEl = document.getElementById('receipt-file-name');
-
-    if (nameEl) nameEl.innerText = file.name;
-
-    if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            if (previewImg) previewImg.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    } else {
-        if (previewImg) previewImg.src = '/assets/images/pdf-icon.png';
-    }
-
-    if (emptyView) emptyView.style.display = 'none';
-    if (previewView) previewView.style.display = 'flex';
-
-    checkDepositValidity();
-}
-
-function removeReceiptFile(event) {
-    if (event) event.stopPropagation();
-    haptic();
-
-    selectedDepositFile = null;
-    const fileInput = document.getElementById('input-receipt-file');
-    if (fileInput) fileInput.value = '';
-
-    const emptyView = document.getElementById('receipt-empty-view');
-    const previewView = document.getElementById('receipt-preview-view');
-
-    if (emptyView) emptyView.style.display = 'flex';
-    if (previewView) previewView.style.display = 'none';
-
-    checkDepositValidity();
-}
-
-async function submitDepositPayment() {
-    haptic();
-    const amountInput = document.getElementById('input-deposit-amount');
-    const amount = parseFloat(amountInput ? amountInput.value : 0);
-
-    if (!amount || amount < 1000) {
-        amountInput?.focus();
-        return;
-    }
-
-    const btn = document.getElementById('btn-submit-deposit');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>⏳ Tekshirilmoqda...</span>';
-    }
-
-    const formData = new FormData();
-    formData.append('user_id', state.userId || window.APP_DEFAULT_USER_ID || 1);
-    formData.append('amount', amount);
-    if (selectedDepositFile) {
-        formData.append('receipt', selectedDepositFile);
-    }
-
-    try {
-        const res = await fetch('/api/wallet/deposit', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'lang': 'uz'
-            },
-            body: formData
-        });
-
-        const data = await res.json();
-        if (data.status) {
-            closeWalletModal();
-            removeReceiptFile();
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
-            }
-        }
-    } catch (e) {
-        console.log('Deposit error:', e);
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="btn-icon">✔</span><span>To\'lovni Tasdiqlash & Balansga Qo\'shish</span>';
-        }
-    }
-}
-
 // ==================== BOOST LOGIC ====================
 let selectedBoostPlanId = 2;
 let selectedBoostPrice = 20000;
@@ -741,22 +622,6 @@ function openBoostModal() {
     haptic();
     const modal = document.getElementById('boost-modal-overlay');
     if (!modal) return;
-
-    // Fetch user balance and boost status
-    if (state.userId) {
-        fetch(`/api/boost/status?user_id=${state.userId}`, {
-            headers: { 'lang': 'uz' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.status && res.data) {
-                const balEl = document.getElementById('boost-modal-balance');
-                if (balEl) balEl.innerText = `Balans: ${res.data.formatted_balance}`;
-            }
-        })
-        .catch(e => console.log('Boost status error:', e));
-    }
-
     modal.classList.add('active');
 }
 
@@ -767,10 +632,19 @@ function closeBoostModal(e) {
     if (modal) modal.classList.remove('active');
 }
 
-function selectBoostPlan(planId, price) {
+function selectBoostPlan(planId, price, title = '', formattedPrice = '', subtitle = '', icon = '⚡') {
     haptic();
     selectedBoostPlanId = parseInt(planId, 10);
     selectedBoostPrice = price;
+
+    window.SELECTED_BOOST_PLAN = {
+        id: selectedBoostPlanId,
+        title: title || `${planId} soatlik Boost`,
+        price: price,
+        formattedPrice: formattedPrice || `${price.toLocaleString()} UZS`,
+        subtitle: subtitle || 'Profilni 1-o\'ringa ko\'tarish',
+        icon: icon || '⚡'
+    };
 
     document.querySelectorAll('.boost-plan-card').forEach(card => card.classList.remove('active'));
     const activeCard = document.getElementById(`boost-plan-${planId}`);
@@ -778,56 +652,171 @@ function selectBoostPlan(planId, price) {
 
     const labelEl = document.getElementById('btn-boost-label');
     if (labelEl) {
-        labelEl.innerText = `Balansdan Faollashtirish (${price.toLocaleString()} UZS)`;
+        labelEl.innerText = `To'lov qilish va Faollashtirish (${window.SELECTED_BOOST_PLAN.formattedPrice})`;
     }
 }
 
-async function activateSelectedBoost() {
+function proceedToBoostPayment() {
     haptic();
-    const btn = document.getElementById('btn-activate-boost');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>⏳ Faollashtirilmoqda...</span>';
+    const plan = window.SELECTED_BOOST_PLAN || {
+        id: selectedBoostPlanId || 1,
+        title: '3 soatlik Boost',
+        price: selectedBoostPrice || 20000,
+        formattedPrice: '20 000 UZS',
+        subtitle: 'Profilni 1-o\'ringa ko\'tarish',
+        icon: '🚀'
+    };
+
+    closeBoostModal();
+    openUniversalPaymentReceipt('boost', plan);
+}
+
+// Universal Payment & Receipt Management
+let activeReceiptFile = null;
+window.ACTIVE_PAYMENT_TARGET = { type: 'boost', id: 1, title: 'Boost', price: 20000 };
+
+window.openUniversalPaymentReceipt = function(type, item) {
+    haptic();
+    window.ACTIVE_PAYMENT_TARGET = {
+        type: type,
+        id: item.id,
+        title: item.title || item.name || (type === 'boost' ? 'MatchMe Boost' : 'MatchMe Premium'),
+        price: item.price,
+        formattedPrice: item.formattedPrice || `${item.price.toLocaleString()} UZS`,
+        subtitle: item.subtitle || (type === 'boost' ? 'Profilni 1-o\'ringa ko\'tarish' : 'Cheklovlarsiz Premium imkoniyatlar'),
+        icon: item.icon || (type === 'boost' ? '⚡' : '👑')
+    };
+
+    const modal = document.getElementById('modal-payment-receipt');
+    if (!modal) return;
+
+    // Update Modal UI
+    const iconEl = document.getElementById('receipt-summary-icon');
+    if (iconEl) iconEl.innerText = window.ACTIVE_PAYMENT_TARGET.icon;
+
+    const titleEl = document.getElementById('receipt-summary-plan-title');
+    if (titleEl) titleEl.innerText = window.ACTIVE_PAYMENT_TARGET.title;
+
+    const subEl = document.getElementById('receipt-summary-plan-sub');
+    if (subEl) subEl.innerText = window.ACTIVE_PAYMENT_TARGET.subtitle;
+
+    const priceEl = document.getElementById('receipt-summary-plan-price');
+    if (priceEl) priceEl.innerText = window.ACTIVE_PAYMENT_TARGET.formattedPrice;
+
+    const exactAmountEl = document.getElementById('payment-exact-amount-text');
+    if (exactAmountEl) exactAmountEl.innerText = window.ACTIVE_PAYMENT_TARGET.formattedPrice;
+
+    modal.style.display = 'flex';
+};
+
+window.closePaymentReceiptModal = function() {
+    haptic();
+    const modal = document.getElementById('modal-payment-receipt');
+    if (modal) modal.style.display = 'none';
+};
+
+window.handleReceiptFileSelect = function(input) {
+    if (!input.files || !input.files[0]) return;
+    activeReceiptFile = input.files[0];
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const previewImg = document.getElementById('receipt-preview-img');
+        if (previewImg) previewImg.src = e.target.result;
+        const emptyView = document.getElementById('receipt-empty-view');
+        if (emptyView) emptyView.style.display = 'none';
+        const previewView = document.getElementById('receipt-preview-view');
+        if (previewView) previewView.style.display = 'block';
+    };
+    reader.readAsDataURL(activeReceiptFile);
+};
+
+window.removeReceiptPreview = function() {
+    activeReceiptFile = null;
+    const fileInput = document.getElementById('receipt-file-input');
+    if (fileInput) fileInput.value = '';
+    const previewImg = document.getElementById('receipt-preview-img');
+    if (previewImg) previewImg.src = '';
+    const emptyView = document.getElementById('receipt-empty-view');
+    if (emptyView) emptyView.style.display = 'block';
+    const previewView = document.getElementById('receipt-preview-view');
+    if (previewView) previewView.style.display = 'none';
+};
+
+window.copyCardNumber = function() {
+    haptic();
+    const cardText = document.getElementById('payment-card-number-text')?.innerText || '9860030145287890';
+    const cleanDigits = cardText.replace(/\s+/g, '');
+    navigator.clipboard.writeText(cleanDigits).then(() => {
+        const copyBtnText = document.getElementById('copy-btn-text');
+        if (copyBtnText) copyBtnText.innerText = 'Nusxalandi!';
+        if (window.showToast) window.showToast('Karta raqami nusxalandi: ' + cleanDigits);
+        setTimeout(() => {
+            if (copyBtnText) copyBtnText.innerText = 'Nusxalash';
+        }, 2000);
+    });
+};
+
+window.submitUniversalPaymentReceipt = async function() {
+    haptic();
+    if (!activeReceiptFile) {
+        if (window.showToast) window.showToast('Iltimos, to\'lov cheki skrinshotini yuklang! 📸');
+        return;
     }
 
+    const btn = document.getElementById('btn-submit-receipt');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Chek yuborilmoqda... ⏳';
+    }
+
+    const target = window.ACTIVE_PAYMENT_TARGET || { type: 'boost', id: 1 };
+    const notes = document.getElementById('receipt-input-notes')?.value || '';
+    const userId = state.userId || localStorage.getItem('matchme_user_id') || window.APP_DEFAULT_USER_ID || 1;
+
+    const formData = new FormData();
+    if (target.type === 'boost') {
+        formData.append('boost_id', target.id);
+    } else {
+        formData.append('plan_id', target.id);
+    }
+    formData.append('receipt', activeReceiptFile);
+    if (notes) formData.append('notes', notes);
+    if (userId) formData.append('user_id', userId);
+
     try {
-        const res = await fetch('/api/boost/activate', {
+        const res = await fetch('/api/profile/submit-receipt', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'lang': 'uz'
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                user_id: state.userId || window.APP_DEFAULT_USER_ID || 1,
-                plan_id: selectedBoostPlanId
-            })
+            body: formData
         });
 
         const data = await res.json();
-        if (data.status) {
-            closeBoostModal();
+        if (res.ok && data.status) {
+            if (window.showToast) window.showToast('To\'lov chekingiz qabul qilindi! Admin tasdiqlagach faollashadi ✨');
+            removeReceiptPreview();
+            const notesInput = document.getElementById('receipt-input-notes');
+            if (notesInput) notesInput.value = '';
+            closePaymentReceiptModal();
             if (typeof confetti === 'function') {
-                confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+                confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
             }
         } else {
-            // Insufficient balance: redirect user to Top up Wallet
-            closeBoostModal();
-            openBalanceModal();
-            if (data.data?.required_amount) {
-                selectPresetAmount(Math.max(20000, data.data.required_amount));
-            }
+            if (window.showToast) window.showToast(data.message || 'Chekni yuborishda xatolik yuz berdi');
         }
     } catch (e) {
-        console.log('Boost activate error:', e);
-        closeBoostModal();
+        console.error('Receipt submission error:', e);
+        if (window.showToast) window.showToast('Server bilan bog\'lanishda xatolik');
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<span class="btn-icon">⚡</span><span id="btn-boost-label">Balansdan Faollashtirish (${selectedBoostPrice.toLocaleString()} UZS)</span>`;
+            btn.innerHTML = '📤 To\'lov Chekini Yuborish ➔';
         }
     }
-}
+};
 
 // Discovery Filter Bottom Sheet Logic
 const filterState = {
@@ -1065,22 +1054,6 @@ function updateLikesBadge() {
             </div>
         `;
     }
-}
-
-// Load balance on Likes Page load
-if (window.location.pathname.includes('/likes')) {
-    document.addEventListener('DOMContentLoaded', () => {
-        const uid = state.userId || window.APP_DEFAULT_USER_ID || 1;
-        fetch(`/api/wallet/balance?user_id=${uid}`, { headers: { 'lang': 'uz' } })
-            .then(r => r.json())
-            .then(res => {
-                if (res.status && res.data) {
-                    const el = document.getElementById('likes-page-balance');
-                    if (el) el.innerText = res.data.formatted_balance;
-                }
-            })
-            .catch(() => {});
-    });
 }
 
 // ==================== SPEED ROULETTE LOGIC ====================

@@ -34,7 +34,6 @@ class User extends Authenticatable
         'longitude',
         'bio',
         'onboarding_completed',
-        'balance',
         'daily_streak',
         'is_vip',
         'vip_expires_at',
@@ -71,7 +70,6 @@ class User extends Authenticatable
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'onboarding_completed' => 'boolean',
-            'balance' => 'decimal:2',
             'daily_streak' => 'integer',
             'is_vip' => 'boolean',
             'vip_expires_at' => 'datetime',
@@ -118,14 +116,6 @@ class User extends Authenticatable
     public function filter(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(UserFilter::class);
-    }
-
-    /**
-     * User balance deposits.
-     */
-    public function deposits(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Deposit::class);
     }
 
     /**

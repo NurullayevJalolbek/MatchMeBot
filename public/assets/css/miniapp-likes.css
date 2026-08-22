@@ -15,69 +15,10 @@
     position: relative;
 }
 
-.likes-clean-header {
-    height: 52px;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #141724;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    flex-shrink: 0;
-    z-index: 10;
-}
-.header-placeholder-left {
-    width: 36px;
-}
-.likes-center-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.nav-title-heart {
-    width: 20px;
-    height: 20px;
-    fill: #f43f5e;
-}
-.nav-title-text {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #ffffff;
-}
-.header-right-tools {
-    display: flex;
-    align-items: center;
-}
-.pill-balance {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: #0f111a;
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    padding: 4px 10px;
-    border-radius: 16px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #fbbf24;
-    cursor: pointer;
-}
-.balance-plus-badge {
-    background: #fbbf24;
-    color: #000;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 900;
-}
-
 .likes-scroll-content {
     flex: 1;
     overflow-y: auto;
-    padding: 14px 14px 75px 14px;
+    padding: 16px 14px 85px 14px;
     display: flex;
     flex-direction: column;
     gap: 16px;

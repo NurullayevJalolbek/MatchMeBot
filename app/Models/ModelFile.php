@@ -51,10 +51,28 @@ class ModelFile extends Model
             return '';
         }
 
+        // Full remote URL (e.g. Unsplash, external CDN)
         if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://')) {
+            $parsed = parse_url($this->file_path);
+            if (isset($parsed['host']) && in_array($parsed['host'], ['localhost', '127.0.0.1'])) {
+                return $parsed['path'] ?? $this->file_path;
+            }
             return $this->file_path;
         }
 
-        return '/' . ltrim($this->file_path, '/');
+        $cleanPath = ltrim($this->file_path, '/');
+
+        // If it starts with storage/
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return '/' . $cleanPath;
+        }
+
+        // If it starts with assets/
+        if (str_starts_with($cleanPath, 'assets/')) {
+            return '/' . $cleanPath;
+        }
+
+        // Local storage files (e.g. photos/..., receipts/...)
+        return '/storage/' . $cleanPath;
     }
 }

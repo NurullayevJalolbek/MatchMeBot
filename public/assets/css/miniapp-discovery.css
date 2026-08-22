@@ -307,14 +307,48 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
-/* 2. Gift in Center */
+/* 2. Gift in Center - Ultra-Luxury VIP Style */
 .btn-gift {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #ffffff;
-    font-size: 22px;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+    width: 52px;
+    height: 52px;
+    background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #d97706 60%, #b45309 100%);
+    border: 2px solid rgba(254, 240, 138, 0.6);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.55), 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: visible;
+}
+.gift-icon-container {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.svg-luxury-gift {
+    width: 26px;
+    height: 26px;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+    transition: transform 0.25s ease;
+}
+.btn-gift:active .svg-luxury-gift {
+    transform: scale(0.9) rotate(-6deg);
+}
+.gift-sparkle-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 7px;
+    height: 7px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px 2px #fef08a;
+    animation: sparklePulse 1.8s ease-in-out infinite;
+}
+@keyframes sparklePulse {
+    0%, 100% { transform: scale(0.6); opacity: 0.4; }
+    50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px 3px #ffffff; }
 }
 
 /* 3. Like */

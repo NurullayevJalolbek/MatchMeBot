@@ -8,14 +8,12 @@ use App\Contracts\iLikesService;
 use App\Contracts\iOnboardingService;
 use App\Contracts\iTelegramBotService;
 use App\Contracts\iTelegramUserService;
-use App\Contracts\iWalletService;
 use App\Services\BoostService;
 use App\Services\DiscoveryService;
 use App\Services\LikesService;
 use App\Services\OnboardingService;
 use App\Services\TelegramBotService;
 use App\Services\TelegramUserService;
-use App\Services\WalletService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Contracts\iExpenseService::class, \App\Services\ExpenseService::class);
         $this->app->singleton(\App\Contracts\iPaymentService::class, \App\Services\PaymentService::class);
         $this->app->singleton(\App\Contracts\iProfileOptionService::class, \App\Services\ProfileOptionService::class);
+        $this->app->singleton(\App\Contracts\iProfileService::class, \App\Services\ProfileService::class);
+        $this->app->singleton(\App\Contracts\iUserManagementService::class, \App\Services\UserManagementService::class);
     }
 
     /**

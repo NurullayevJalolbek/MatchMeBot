@@ -130,15 +130,15 @@ class OnboardingService implements iOnboardingService
     {
         $filename = 'photo_' . $user->id . '_' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
         $storedPath = $file->storeAs('photos', $filename, 'public');
-        $publicUrl = Storage::disk('public')->url($storedPath);
 
         $currentPhotosCount = $user->photos()->count();
 
+        $modelFile = null;
         if ($currentPhotosCount < 3) {
-            ModelFile::create([
+            $modelFile = ModelFile::create([
                 'model_type' => User::class,
                 'model_id' => $user->id,
-                'file_path' => $publicUrl,
+                'file_path' => $storedPath,
                 'file_type' => 'photo',
                 'mime_type' => $file->getClientMimeType(),
                 'file_size' => $file->getSize(),
@@ -147,7 +147,7 @@ class OnboardingService implements iOnboardingService
             ]);
         }
 
-        return $publicUrl;
+        return $modelFile ? $modelFile->url : '/storage/' . $storedPath;
     }
 
     /**

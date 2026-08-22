@@ -312,7 +312,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Submit subscription payment receipt screenshot.
+     * Submit subscription or boost payment receipt screenshot.
      */
     public function submitReceipt(Request $request): JsonResponse
     {
@@ -326,22 +326,47 @@ class ProfileController extends Controller
         }
 
         $request->validate([
-            'plan_id' => 'required|integer|exists:subscription_plans,id',
+            'plan_id' => 'nullable|integer|exists:subscription_plans,id',
+            'boost_id' => 'nullable|integer|exists:boost_plans,id',
             'receipt' => 'required|image|mimes:jpeg,png,jpg,webp,heic|max:10240',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $plan = \App\Models\SubscriptionPlan::findOrFail($request->input('plan_id'));
+        if (!$request->filled('plan_id') && !$request->filled('boost_id')) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tarif yoki Boost tanlanmadi',
+            ], 422);
+        }
+
+        $payableType = null;
+        $payableId = null;
+        $amount = 0;
+        $incomeCategoryId = null;
+
+        if ($request->filled('boost_id')) {
+            $boostPlan = \App\Models\BoostPlan::findOrFail($request->input('boost_id'));
+            $payableType = \App\Models\BoostPlan::class;
+            $payableId = $boostPlan->id;
+            $amount = $boostPlan->price;
+            $incomeCategoryId = $boostPlan->income_category_id;
+        } else {
+            $plan = \App\Models\SubscriptionPlan::findOrFail($request->input('plan_id'));
+            $payableType = \App\Models\SubscriptionPlan::class;
+            $payableId = $plan->id;
+            $amount = $plan->price;
+            $incomeCategoryId = $plan->income_category_id;
+        }
 
         $filename = \Illuminate\Support\Str::random(24) . '.' . $request->file('receipt')->getClientOriginalExtension();
         $path = $request->file('receipt')->storeAs('receipts', $filename, 'public');
 
         $payment = \App\Models\Payment::create([
             'user_id' => $user->id,
-            'income_category_id' => $plan->income_category_id,
-            'payable_type' => \App\Models\SubscriptionPlan::class,
-            'payable_id' => $plan->id,
-            'amount' => $plan->price,
+            'income_category_id' => $incomeCategoryId,
+            'payable_type' => $payableType,
+            'payable_id' => $payableId,
+            'amount' => $amount,
             'receipt_image' => $path,
             'status' => \App\Enums\Finance\PaymentStatusEnum::PENDING,
             'notes' => $request->input('notes'),
@@ -349,7 +374,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'To\'lov cheki muvaffaqiyatli qabul qilindi! Admin tekshiruvidan so\'ng obunangiz faollashtiriladi ✨',
+            'message' => 'To\'lov cheki muvaffaqiyatli qabul qilindi! Admin tekshiruvidan so\'ng xizmat faollashtiriladi ✨',
             'data' => [
                 'payment_id' => $payment->id,
                 'amount' => $payment->amount,

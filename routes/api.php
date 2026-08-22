@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\BoostController;
 use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\OnboardingController;
-use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\TelegramBotController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

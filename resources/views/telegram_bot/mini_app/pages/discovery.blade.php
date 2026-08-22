@@ -634,9 +634,38 @@
             </svg>
         </button>
 
-        <!-- 2. Gift Button in Center -->
-        <button type="button" class="btn-action-circle btn-gift" onclick="openVipModal()" title="Sovg'a yuborish">
-            🎁
+        <!-- 2. Luxury VIP Gift Button in Center -->
+        <button type="button" class="btn-action-circle btn-gift" onclick="openVipModal()" title="VIP Sovg'a yuborish">
+            <div class="gift-icon-container">
+                <svg viewBox="0 0 24 24" class="svg-luxury-gift" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="giftGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fffbeb" />
+                            <stop offset="35%" stop-color="#fef08a" />
+                            <stop offset="100%" stop-color="#f59e0b" />
+                        </linearGradient>
+                        <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" />
+                            <stop offset="100%" stop-color="#fef9c3" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Gift Box Base -->
+                    <rect x="3.5" y="10" width="17" height="11" rx="2.5" fill="url(#giftGoldGrad)" />
+                    <!-- Gift Box Lid -->
+                    <rect x="2" y="6.5" width="20" height="4" rx="1.5" fill="url(#giftGoldGrad)" />
+                    <!-- Vertical Ribbon -->
+                    <rect x="10.5" y="6.5" width="3" height="14.5" rx="0.5" fill="url(#ribbonGrad)" opacity="0.95" />
+                    <!-- Horizontal Ribbon on Lid -->
+                    <rect x="2" y="8" width="20" height="1.2" fill="url(#ribbonGrad)" opacity="0.7" />
+                    <!-- Bow Left Loop -->
+                    <path d="M12 7C10 3.8 6.5 4.2 6.5 5.8C6.5 7.4 10.5 7 12 7Z" fill="url(#ribbonGrad)" />
+                    <!-- Bow Right Loop -->
+                    <path d="M12 7C14 3.8 17.5 4.2 17.5 5.8C17.5 7.4 13.5 7 12 7Z" fill="url(#ribbonGrad)" />
+                    <!-- Bow Center Knot -->
+                    <circle cx="12" cy="7" r="1.3" fill="#ffffff" />
+                </svg>
+                <span class="gift-sparkle-dot"></span>
+            </div>
         </button>
 
         <!-- 3. Like Button -->

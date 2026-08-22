@@ -63,11 +63,11 @@
 
         <!-- Action Buttons -->
         <div class="vip-action-group">
-            <button type="button" class="btn-get-vip" onclick="openBalanceModal(); closeVipModal();">
-                <svg viewBox="0 0 24 24" class="btn-action-svg">
-                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+            <button type="button" class="btn-get-vip" onclick="window.location.href='/profile'; closeVipModal();">
+                <svg viewBox="0 0 24 24" class="btn-action-svg" fill="currentColor">
+                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1z"/>
                 </svg>
-                <span>Balansni To'ldirish & VIP Olish</span>
+                <span>Premium Obuna Olish 👑</span>
             </button>
             <button type="button" class="btn-vip-free-fallback" onclick="selectRouletteGender('all'); closeVipModal();">
                 <span>Bepul rejimda (Hamma bilan) davom etish</span>
