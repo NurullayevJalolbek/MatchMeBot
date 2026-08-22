@@ -1,0 +1,16 @@
+[
+  { "id": 1, "name_uz": "Toshkent shahri", "name_ru": "г. Ташкент", "order": 1 },
+  { "id": 2, "name_uz": "Toshkent viloyati", "name_ru": "Ташкентская область", "order": 2 },
+  { "id": 3, "name_uz": "Samarqand viloyati", "name_ru": "Самаркандская область", "order": 3 },
+  { "id": 4, "name_uz": "Andijon viloyati", "name_ru": "Андижанская область", "order": 4 },
+  { "id": 5, "name_uz": "Farg'ona viloyati", "name_ru": "Ферганская область", "order": 5 },
+  { "id": 6, "name_uz": "Namangan viloyati", "name_ru": "Наманганская область", "order": 6 },
+  { "id": 7, "name_uz": "Buxoro viloyati", "name_ru": "Бухарская область", "order": 7 },
+  { "id": 8, "name_uz": "Xorazm viloyati", "name_ru": "Хорезмская область", "order": 8 },
+  { "id": 9, "name_uz": "Qashqadaryo viloyati", "name_ru": "Кашкадарьинская область", "order": 9 },
+  { "id": 10, "name_uz": "Surxondaryo viloyati", "name_ru": "Сурхандарьинская область", "order": 10 },
+  { "id": 11, "name_uz": "Jizzax viloyati", "name_ru": "Джизакская область", "order": 11 },
+  { "id": 12, "name_uz": "Sirdaryo viloyati", "name_ru": "Сырдарьинская область", "order": 12 },
+  { "id": 13, "name_uz": "Navoiy viloyati", "name_ru": "Навоийская область", "order": 13 },
+  { "id": 14, "name_uz": "Qoraqalpog'iston Respublikasi", "name_ru": "Республика Каракалпакстан", "order": 14 }
+]
