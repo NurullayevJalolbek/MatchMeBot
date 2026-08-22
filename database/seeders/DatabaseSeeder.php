@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
             BoostPlanSeeder::class,
             SubscriptionPlanSeeder::class,
             ProfileOptionSeeder::class,
-            UserLikesSeeder::class,
         ]);
     }
 }

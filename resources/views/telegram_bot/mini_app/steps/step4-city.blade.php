@@ -13,9 +13,10 @@
 
     <div class="form-group">
         <label class="form-label">Shahar / Viloyat</label>
-        <select id="input-city" class="form-input form-select">
+        <select id="input-city" class="form-input form-select" onchange="checkStep4Valid()">
+            <option value="" disabled selected>Shahringizni tanlang...</option>
             @foreach(\App\Enums\General\CityEnum::cases() as $city)
-                <option value="{{ $city->value }}" {{ $city->value === 'tashkent_city' ? 'selected' : '' }}>
+                <option value="{{ $city->value }}">
                     {{ $city->label() }}
                 </option>
             @endforeach
@@ -37,7 +38,7 @@
         <button class="btn-back" onclick="goToStep(3)">
             Orqaga
         </button>
-        <button class="btn-primary" onclick="submitStep4()">
+        <button class="btn-primary disabled" id="btn-submit-step4" onclick="submitStep4()" disabled>
             Davom etish ➔
         </button>
     </div>

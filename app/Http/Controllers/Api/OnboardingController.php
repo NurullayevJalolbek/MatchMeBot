@@ -40,7 +40,7 @@ class OnboardingController extends Controller
     public function acceptTerms(Request $request): JsonResponse
     {
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -62,7 +62,7 @@ class OnboardingController extends Controller
     {
         $step = (int) $request->input('step', 1);
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -74,13 +74,21 @@ class OnboardingController extends Controller
             2 => ['birth_date' => 'required|date|before:-18 years'],
             3 => ['gender' => 'required|in:male,female', 'looking_for' => 'required|in:female,male,all'],
             4 => ['city' => 'required|string|max:100'],
-            5 => ['bio' => 'nullable|string|max:250'],
+            5 => ['bio' => 'required|string|min:10|max:250'],
             6 => [],
             default => [],
         };
 
         $messages = [
+            'name.required' => "Ismingizni kiritishingiz shart.",
+            'name.min' => "Ism kamida 2 ta harfdan iborat bo'lishi kerak.",
+            'birth_date.required' => "Tug'ilgan sanangizni tanlashingiz shart.",
             'birth_date.before' => "Xizmatdan faqat 18 yoshdan kattalar foydalanishi mumkin.",
+            'gender.required' => "Jinsingizni tanlashingiz shart.",
+            'looking_for.required' => "Kimni qidirayotganingizni tanlashingiz shart.",
+            'city.required' => "Shahringizni tanlashingiz shart.",
+            'bio.required' => "O'zingiz haqingizda ma'lumot (bio) kiritishingiz shart.",
+            'bio.min' => "Bio kamida 10 ta belgidan iborat bo'lishi kerak.",
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -90,6 +98,13 @@ class OnboardingController extends Controller
                 'status' => false,
                 'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if ($step === 6 && $user->photos()->count() < 1) {
+            return response()->json([
+                'status' => false,
+                'message' => "Profilingizni yakunlash uchun kamida 1 ta fotosurat yuklashingiz shart!",
             ], 422);
         }
 
@@ -127,7 +142,7 @@ class OnboardingController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -163,7 +178,7 @@ class OnboardingController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);

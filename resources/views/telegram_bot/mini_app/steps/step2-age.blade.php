@@ -25,7 +25,7 @@
         <button class="btn-back" onclick="goToStep(1)">
             Orqaga
         </button>
-        <button class="btn-primary" id="btn-submit-step2" onclick="submitStep2()">
+        <button class="btn-primary disabled" id="btn-submit-step2" onclick="submitStep2()" disabled>
             Davom etish ➔
         </button>
     </div>

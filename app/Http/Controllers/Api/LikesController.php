@@ -21,7 +21,7 @@ class LikesController extends Controller
     public function getLikes(Request $request): JsonResponse
     {
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -54,7 +54,7 @@ class LikesController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -87,7 +87,7 @@ class LikesController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);

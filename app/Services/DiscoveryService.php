@@ -50,11 +50,16 @@ class DiscoveryService implements iDiscoveryService
     {
         $filter = $this->getFilter($user);
 
+        $interactedUserIds = \App\Models\UserLike::where('from_user_id', $user->id)
+            ->pluck('to_user_id')
+            ->toArray();
+
         $query = User::where('id', '!=', $user->id)
             ->where('onboarding_completed', true)
+            ->whereNotIn('id', $interactedUserIds)
             ->with(['photos', 'primaryPhoto']);
 
-        if ($filter->looking_for !== 'all') {
+        if (!empty($filter->looking_for) && $filter->looking_for !== 'all') {
             $query->where('gender', $filter->looking_for);
         }
 
@@ -70,6 +75,25 @@ class DiscoveryService implements iDiscoveryService
             $query->where('city', $filter->city);
         }
 
-        return $query->limit($limit)->get()->toArray();
+        return $query->limit($limit)->get()->map(function ($u) {
+            $photoUrls = $u->photo_urls ?? [];
+            $mainPhoto = !empty($photoUrls) ? $photoUrls[0] : null;
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name ?? $u->first_name ?? 'Foydalanuvchi',
+                'age' => $u->age,
+                'gender' => is_object($u->gender) ? $u->gender->value : $u->gender,
+                'city' => $u->city,
+                'city_label' => ucfirst(str_replace('_', ' ', $u->city ?? 'Toshkent')),
+                'bio' => $u->bio,
+                'is_vip' => (bool) $u->is_vip,
+                'height' => $u->height,
+                'weight' => $u->weight,
+                'occupation' => $u->occupation,
+                'photos' => $photoUrls,
+                'primary_photo' => $mainPhoto,
+            ];
+        })->values()->toArray();
     }
 }

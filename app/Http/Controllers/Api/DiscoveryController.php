@@ -21,7 +21,7 @@ class DiscoveryController extends Controller
     public function getFilter(Request $request): JsonResponse
     {
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -59,7 +59,7 @@ class DiscoveryController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -71,6 +71,27 @@ class DiscoveryController extends Controller
             'status' => true,
             'message' => __('message.Successfully updated'),
             'data' => $filter,
+        ]);
+    }
+
+    /**
+     * Get candidate profiles for discovery swiping.
+     */
+    public function getCandidates(Request $request): JsonResponse
+    {
+        $userId = $request->input('user_id');
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
+        }
+
+        $candidates = $this->discoveryService->getCandidates($user);
+
+        return response()->json([
+            'status' => true,
+            'message' => __('message.Data retrieved successfully'),
+            'data' => $candidates,
         ]);
     }
 }

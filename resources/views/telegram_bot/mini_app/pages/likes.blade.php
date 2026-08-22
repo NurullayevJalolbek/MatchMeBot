@@ -2,11 +2,13 @@
 
 @section('content')
 @php
-    $mainUser = auth()->user() ?? \App\Models\User::first();
-    $allLikes = \App\Models\UserLike::with('fromUser')
-        ->where('to_user_id', $mainUser?->id ?? 1)
-        ->where('status', 'pending')
-        ->get();
+    $mainUser = auth()->user();
+    $allLikes = $mainUser
+        ? \App\Models\UserLike::with('fromUser')
+            ->where('to_user_id', $mainUser->id)
+            ->where('status', 'pending')
+            ->get()
+        : collect();
     $vipLikes = $allLikes->where('is_gift', true);
     $regularLikes = $allLikes->where('is_gift', false);
 @endphp
@@ -84,10 +86,10 @@
                         @foreach($regularLikes as $like)
                             <div class="regular-like-card" id="like-card-{{ $like->id }}">
                                 <div class="card-image-box">
-                                    <img src="{{ $like->fromUser?->primary_photo_url ?? 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80' }}" alt="{{ $like->fromUser?->name }}" class="regular-card-img">
+                                    <img src="{{ $like->fromUser?->primary_photo_url ?? asset('assets/images/no-avatar.png') }}" alt="{{ $like->fromUser?->name }}" class="regular-card-img">
                                     <div class="card-info-gradient">
-                                        <div class="card-user-title">{{ $like->fromUser?->name ?? 'Madina' }}, {{ $like->fromUser?->age ?? 23 }}</div>
-                                        <div class="card-user-city">📍 {{ ucfirst(str_replace('_', ' ', $like->fromUser?->city ?? 'Samarkand')) }}</div>
+                                        <div class="card-user-title">{{ $like->fromUser?->name ?? 'Foydalanuvchi' }}{{ $like->fromUser?->age ? ', ' . $like->fromUser->age : '' }}</div>
+                                        <div class="card-user-city">📍 {{ ucfirst(str_replace('_', ' ', $like->fromUser?->city ?? 'Toshkent')) }}</div>
                                     </div>
                                 </div>
                                 <div class="card-actions-row">

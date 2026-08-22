@@ -2,16 +2,16 @@
  * MatchMe Telegram Mini-App Client Logic
  */
 
-// State management
+// State management (No mock defaults)
 const state = {
     userId: null,
     isTermsAccepted: false,
     name: '',
-    birthDate: '2002-05-18',
-    age: 23,
-    gender: 'male',
-    lookingFor: 'female',
-    city: 'tashkent_city',
+    birthDate: '',
+    age: null,
+    gender: null,
+    lookingFor: null,
+    city: '',
     latitude: null,
     longitude: null,
     bio: '',
@@ -33,19 +33,12 @@ if (tg) {
 
 // On Page Load
 document.addEventListener('DOMContentLoaded', async () => {
-    // Preset default date
-    const dateInput = document.getElementById('input-birthdate');
-    if (dateInput) {
-        dateInput.value = state.birthDate;
-        calculateAge();
-    }
-
-    // Get user from Telegram WebApp
+    // Get user from Telegram WebApp if available
     const tgUser = tg?.initDataUnsafe?.user || {
-        id: window.APP_DEFAULT_USER_ID || 123456789,
-        first_name: 'Jasur',
-        last_name: 'Aliyev',
-        username: 'jasur_aliyev',
+        id: window.APP_DEFAULT_USER_ID || null,
+        first_name: '',
+        last_name: '',
+        username: '',
         language_code: 'uz'
     };
 
@@ -70,14 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isCompleted) {
                 localStorage.setItem('matchme_onboarding_completed', 'true');
-                // If onboarding is completed and user is on welcome/register page, jump straight to Discovery!
                 if (currentPath === '/' || currentPath === '/app') {
                     window.location.replace('/discovery');
                     return;
                 }
             } else {
                 localStorage.removeItem('matchme_onboarding_completed');
-                // If onboarding is NOT completed and user is on discovery page, redirect to onboarding!
                 if (currentPath === '/discovery') {
                     window.location.replace('/');
                     return;
@@ -87,16 +78,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data.data.user.name) {
                 state.name = data.data.user.name;
                 const nameInput = document.getElementById('input-name');
-                if (nameInput) nameInput.value = state.name;
+                if (nameInput) {
+                    nameInput.value = state.name;
+                    checkStep1Valid();
+                }
             } else if (tgUser.first_name) {
                 state.name = `${tgUser.first_name} ${tgUser.last_name || ''}`.trim();
                 const nameInput = document.getElementById('input-name');
-                if (nameInput) nameInput.value = state.name;
+                if (nameInput) {
+                    nameInput.value = state.name;
+                    checkStep1Valid();
+                }
+            }
+
+            if (data.data.user.birth_date) {
+                state.birthDate = data.data.user.birth_date.split('T')[0];
+                const dateInput = document.getElementById('input-birthdate');
+                if (dateInput) {
+                    dateInput.value = state.birthDate;
+                    calculateAge();
+                }
+            }
+
+            if (data.data.user.gender) {
+                selectGender(data.data.user.gender);
+            }
+            if (data.data.user.looking_for) {
+                selectLooking(data.data.user.looking_for);
+            }
+
+            if (data.data.user.city) {
+                state.city = data.data.user.city;
+                const citySelect = document.getElementById('input-city');
+                if (citySelect) {
+                    citySelect.value = state.city;
+                    checkStep4Valid();
+                }
+            }
+
+            if (data.data.user.bio) {
+                state.bio = data.data.user.bio;
+                const bioInput = document.getElementById('input-bio');
+                if (bioInput) {
+                    bioInput.value = state.bio;
+                    updateBioCounter();
+                    checkStep5Valid();
+                }
             }
 
             if (data.data.user.photo_urls) {
                 state.photos = data.data.user.photo_urls;
                 renderPhotoSlots(state.photos);
+            }
+
+            if (window.location.pathname.includes('/discovery')) {
+                fetchDiscoveryCandidates();
             }
         }
 
@@ -167,27 +203,42 @@ function goToStep(stepNumber) {
     }
 }
 
-// Step 1: Submit Name
+// ==================== STEP 1: ISMINGIZ ====================
+function checkStep1Valid() {
+    const nameVal = document.getElementById('input-name')?.value.trim() || '';
+    const btn = document.getElementById('btn-submit-step1');
+    const isValid = nameVal.length >= 2;
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+    return isValid;
+}
+
 async function submitStep1() {
-    const nameVal = document.getElementById('input-name').value.trim();
-    if (!nameVal) {
-        alert('Iltimos, ismingizni kiriting!');
+    if (!checkStep1Valid()) {
+        if (window.showToast) window.showToast('Iltimos, ismingizni kiriting (kamida 2 ta belgi)!');
         return;
     }
 
-    state.name = nameVal;
-    await saveStepApi(1, { name: state.name });
-    goToStep(2);
+    state.name = document.getElementById('input-name').value.trim();
+    const ok = await saveStepApi(1, { name: state.name });
+    if (ok) goToStep(2);
 }
 
-// Step 2: Calculate Age & Submit
+// ==================== STEP 2: YOSHINGIZ ====================
 function calculateAge() {
     const dateInput = document.getElementById('input-birthdate');
-    if (!dateInput) return;
-    const dateVal = dateInput.value;
-    if (!dateVal) return;
+    if (!dateInput || !dateInput.value) {
+        const btn = document.getElementById('btn-submit-step2');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+        }
+        return false;
+    }
 
-    const birthDate = new Date(dateVal);
+    const birthDate = new Date(dateInput.value);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();
@@ -196,15 +247,17 @@ function calculateAge() {
     }
 
     state.age = age;
-    state.birthDate = dateVal;
+    state.birthDate = dateInput.value;
 
     const ageCard = document.getElementById('age-result-card');
     const ageBadge = document.getElementById('age-badge-text');
     const btnNext = document.getElementById('btn-submit-step2');
 
+    const isValid = age >= 18 && age <= 100;
+
     if (ageCard && ageBadge && btnNext) {
         ageCard.style.display = 'flex';
-        if (age >= 18) {
+        if (isValid) {
             ageBadge.className = 'age-badge';
             ageBadge.innerText = `${age} yosh (18+)`;
             btnNext.classList.remove('disabled');
@@ -216,44 +269,74 @@ function calculateAge() {
             btnNext.setAttribute('disabled', 'true');
         }
     }
+    return isValid;
 }
 
 async function submitStep2() {
-    if (state.age < 18) {
-        alert('Xizmatdan faqat 18 yoshdan kattalar foydalanishi mumkin!');
+    if (!calculateAge() || !state.birthDate || state.age < 18) {
+        if (window.showToast) window.showToast('Xizmatdan faqat 18 yoshdan oshganlar foydalanishi mumkin!');
         return;
     }
 
-    await saveStepApi(2, { birth_date: state.birthDate });
-    goToStep(3);
+    const ok = await saveStepApi(2, { birth_date: state.birthDate });
+    if (ok) goToStep(3);
 }
 
-// Step 3: Gender & Looking For
+// ==================== STEP 3: JINSINGIZ & QIDIRUV ====================
+function checkStep3Valid() {
+    const btn = document.getElementById('btn-submit-step3');
+    const isValid = Boolean(state.gender && state.lookingFor);
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+    return isValid;
+}
+
 function selectGender(val) {
     haptic();
     state.gender = val;
-    document.getElementById('gender-male').classList.toggle('selected', val === 'male');
-    document.getElementById('gender-female').classList.toggle('selected', val === 'female');
+    document.getElementById('gender-male')?.classList.toggle('selected', val === 'male');
+    document.getElementById('gender-female')?.classList.toggle('selected', val === 'female');
+    checkStep3Valid();
 }
 
 function selectLooking(val) {
     haptic();
     state.lookingFor = val;
-    document.getElementById('looking-female').classList.toggle('selected', val === 'female');
-    document.getElementById('looking-male').classList.toggle('selected', val === 'male');
+    document.getElementById('looking-female')?.classList.toggle('selected', val === 'female');
+    document.getElementById('looking-male')?.classList.toggle('selected', val === 'male');
+    checkStep3Valid();
 }
 
 async function submitStep3() {
-    await saveStepApi(3, { gender: state.gender, looking_for: state.lookingFor });
-    goToStep(4);
+    if (!checkStep3Valid()) {
+        if (window.showToast) window.showToast('Iltimos, jinsingiz va kimni qidirayotganingizni tanlang!');
+        return;
+    }
+
+    const ok = await saveStepApi(3, { gender: state.gender, looking_for: state.lookingFor });
+    if (ok) goToStep(4);
 }
 
-// Step 4: City & Geolocation
+// ==================== STEP 4: SHAHRINGIZ ====================
+function checkStep4Valid() {
+    const cityVal = document.getElementById('input-city')?.value || '';
+    state.city = cityVal;
+    const btn = document.getElementById('btn-submit-step4');
+    const isValid = cityVal !== '' && cityVal !== null;
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+    return isValid;
+}
+
 function detectGeolocation() {
     haptic();
     const geoText = document.getElementById('geo-text');
     if (!navigator.geolocation) {
-        alert('Qurilmangiz geolokatsiyani qo\'llab-quvvatlamaydi');
+        if (window.showToast) window.showToast('Qurilmangiz geolokatsiyani qo\'llab-quvvatlamaydi');
         return;
     }
 
@@ -266,8 +349,6 @@ function detectGeolocation() {
             state.latitude = lat;
             state.longitude = lng;
 
-            // Accurate bounding boxes for each Uzbekistan region
-            // Format: [minLat, maxLat, minLng, maxLng]
             const regions = [
                 { city: 'tashkent_city',  minLat: 41.15, maxLat: 41.50, minLng: 69.10, maxLng: 69.55 },
                 { city: 'tashkent_region',minLat: 40.60, maxLat: 41.80, minLng: 68.70, maxLng: 70.30 },
@@ -285,7 +366,6 @@ function detectGeolocation() {
                 { city: 'karakalpakstan', minLat: 42.00, maxLat: 45.50, minLng: 55.00, maxLng: 62.00 },
             ];
 
-            // Find best matching region (point-in-box check)
             let detectedCity = 'tashkent_city';
             for (const r of regions) {
                 if (lat >= r.minLat && lat <= r.maxLat && lng >= r.minLng && lng <= r.maxLng) {
@@ -294,65 +374,79 @@ function detectGeolocation() {
                 }
             }
 
-            // Fallback: find nearest region center if no exact match
-            if (detectedCity === 'tashkent_city' && regions[0].city !== 'tashkent_city') {
-                let minDist = Infinity;
-                for (const r of regions) {
-                    const centerLat = (r.minLat + r.maxLat) / 2;
-                    const centerLng = (r.minLng + r.maxLng) / 2;
-                    const dist = Math.pow(lat - centerLat, 2) + Math.pow(lng - centerLng, 2);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        detectedCity = r.city;
-                    }
-                }
-            }
-
             const citySelect = document.getElementById('input-city');
             if (citySelect) {
                 citySelect.value = detectedCity;
                 state.city = detectedCity;
+                checkStep4Valid();
             }
 
             geoText.innerText = '✅ Geolokatsiya aniqlandi!';
         },
         (err) => {
             geoText.innerText = 'Geolokatsiyani avto-aniqlash';
-            if (err.code === 1) {
-                alert('Geolokatsiyaga ruxsat berilmadi. Iltimos, shaharni ro\'yxatdan o\'zingiz tanlang.');
-            } else if (err.code === 2) {
-                alert('Lokatsiya aniqlanmadi. Internet aloqasini tekshiring.');
-            } else {
-                alert('Geolokatsiya xatosi. Shaharni ro\'yxatdan tanlang.');
-            }
+            if (window.showToast) window.showToast('Lokatsiyani aniqlab bo\'lmadi. Shahringizni ro\'yxatdan tanlang.');
         },
         {
-            enableHighAccuracy: true,   // GPS ishlatadi, aniqroq
-            timeout: 10000,             // 10 soniya kutadi
-            maximumAge: 60000           // 1 daqiqa kesh
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000
         }
     );
 }
 
 async function submitStep4() {
-    state.city = document.getElementById('input-city').value || 'tashkent_city';
-    await saveStepApi(4, { city: state.city, latitude: state.latitude, longitude: state.longitude });
-    goToStep(5);
+    if (!checkStep4Valid()) {
+        if (window.showToast) window.showToast('Iltimos, shahringizni tanlang!');
+        return;
+    }
+
+    state.city = document.getElementById('input-city').value;
+    const ok = await saveStepApi(4, { city: state.city, latitude: state.latitude, longitude: state.longitude });
+    if (ok) goToStep(5);
 }
 
-// Step 5: Bio
+// ==================== STEP 5: BIO ====================
 function updateBioCounter() {
-    const val = document.getElementById('input-bio').value;
-    document.getElementById('bio-counter').innerText = `${val.length} / 250`;
+    const val = document.getElementById('input-bio')?.value || '';
+    const counter = document.getElementById('bio-counter');
+    if (counter) counter.innerText = `${val.length} / 250`;
+}
+
+function checkStep5Valid() {
+    const bioVal = document.getElementById('input-bio')?.value.trim() || '';
+    state.bio = bioVal;
+    const btn = document.getElementById('btn-submit-step5');
+    const isValid = bioVal.length >= 10;
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+    return isValid;
 }
 
 async function submitStep5() {
+    if (!checkStep5Valid()) {
+        if (window.showToast) window.showToast('Iltimos, o\'zingiz haqingizda kamida 10 ta belgi yozing!');
+        return;
+    }
+
     state.bio = document.getElementById('input-bio').value.trim();
-    await saveStepApi(5, { bio: state.bio });
-    goToStep(6);
+    const ok = await saveStepApi(5, { bio: state.bio });
+    if (ok) goToStep(6);
 }
 
-// Step 6: Photo Upload
+// ==================== STEP 6: RASMLAR ====================
+function checkStep6Valid() {
+    const btn = document.getElementById('btn-submit-step6');
+    const isValid = Array.isArray(state.photos) && state.photos.length >= 1;
+    if (btn) {
+        btn.disabled = !isValid;
+        btn.classList.toggle('disabled', !isValid);
+    }
+    return isValid;
+}
+
 function triggerPhotoUpload(slotIndex) {
     haptic();
     state.currentSlotUploading = slotIndex;
@@ -363,7 +457,6 @@ async function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Instant local preview
     const localPreviewUrl = URL.createObjectURL(file);
     const slotIdx = state.currentSlotUploading || 0;
     const targetSlot = document.getElementById(`photo-slot-${slotIdx}`);
@@ -388,6 +481,7 @@ async function handlePhotoUpload(e) {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
                 'lang': 'uz'
             },
             body: formData
@@ -422,7 +516,6 @@ function renderPhotoSlots(photos = []) {
             photoUrl = rawItem;
         }
 
-        // Clean localhost/127.0.0.1 domain if present
         if (photoUrl.startsWith('http://localhost') || photoUrl.startsWith('http://127.0.0.1')) {
             photoUrl = photoUrl.replace(/^https?:\/\/[^\/]+/, '');
         }
@@ -441,6 +534,7 @@ function renderPhotoSlots(photos = []) {
             `;
         }
     }
+    checkStep6Valid();
 }
 
 async function deletePhoto(index) {
@@ -451,6 +545,7 @@ async function deletePhoto(index) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
                 'lang': 'uz'
             },
             body: JSON.stringify({ user_id: state.userId, photo_index: index })
@@ -463,14 +558,16 @@ async function deletePhoto(index) {
 }
 
 async function submitStep6() {
-    if (state.photos.length === 0) {
-        state.photos = ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80'];
+    if (!checkStep6Valid()) {
+        if (window.showToast) window.showToast('Profilingizni yakunlash uchun kamida 1 ta fotosurat yuklashingiz shart!');
+        return;
     }
 
-    await saveStepApi(6, { photos: state.photos });
+    const ok = await saveStepApi(6, { photos: state.photos });
+    if (!ok) return;
+
     localStorage.setItem('matchme_onboarding_completed', 'true');
 
-    // Show celebration
     haptic();
     if (typeof confetti === 'function') {
         confetti({
@@ -492,11 +589,12 @@ async function submitStep6() {
 async function saveStepApi(step, payload) {
     haptic();
     try {
-        await fetch('/api/onboarding/step', {
+        const res = await fetch('/api/onboarding/step', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
                 'lang': 'uz'
             },
             body: JSON.stringify({
@@ -505,8 +603,18 @@ async function saveStepApi(step, payload) {
                 ...payload
             })
         });
+        const data = await res.json();
+        if (!res.ok || !data.status) {
+            if (window.showToast) {
+                window.showToast(data.message || `Xatolik yuz berdi (${step}-qadam)`);
+            }
+            return false;
+        }
+        return true;
     } catch (e) {
         console.log(`Step ${step} error:`, e);
+        if (window.showToast) window.showToast('Server bilan bog\'lanishda xatolik!');
+        return false;
     }
 }
 
@@ -525,81 +633,179 @@ function switchNavTab(e, tabName) {
     if (activeItem) activeItem.classList.add('active');
 }
 
-// Card Swipe & Actions (Dislike / Gift / Like)
-const sampleProfiles = [
-    {
-        name: 'Madina, 23',
-        is_vip: true,
-        is_verified: true,
-        city: 'Toshkent, 3 km',
-        goal: 'Nikoh & oila',
-        bio: "Dizayner & musiqachi 🎨 Sevimli mashg'ulotim — kofe bilan kitob o'qish va kechki shahar sayrlari.",
-        tags: ['☕ Coffee', '🎨 UI/UX', '✈️ Travel', '🎬 Netflix'],
-        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80'
-    },
-    {
-        name: 'Kamila, 21',
-        is_vip: false,
-        is_verified: true,
-        city: 'Samarqand, 12 km',
-        goal: 'Do\'stlik & suhbat',
-        bio: "Filologiya talabasiman 📚 Chet tillarini o'rganish va sayohat qilishni yaxshi ko'raman.",
-        tags: ['📚 Books', '🌍 Travel', '🎧 Music'],
-        image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80'
-    },
-    {
-        name: 'Zuhra, 24',
-        is_vip: true,
-        is_verified: true,
-        city: 'Toshkent, 5 km',
-        goal: 'Jiddiy munosabat',
-        bio: "Marketing mutaxassisi 📈 Sport, yoga va shinam qahvaxonalarni xush ko'raman.",
-        tags: ['🧘‍♀️ Yoga', '☕ Coffee', '🏃‍♀️ Sport'],
-        image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80'
-    }
-];
+// Discovery Dynamic Candidates
+let discoveryCandidates = [];
+let currentCandidateIndex = 0;
+let currentCandidatePhotoIndex = 0;
 
-let currentProfileIndex = 0;
+async function fetchDiscoveryCandidates() {
+    const userId = state.userId || localStorage.getItem('matchme_user_id');
+    if (!userId) return;
+
+    try {
+        const res = await fetch(`/api/discovery/candidates?user_id=${userId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'lang': 'uz'
+            }
+        });
+        const data = await res.json();
+        if (data.status && Array.isArray(data.data)) {
+            discoveryCandidates = data.data;
+            currentCandidateIndex = 0;
+            currentCandidatePhotoIndex = 0;
+            renderCurrentCandidate();
+        }
+    } catch (e) {
+        console.error('Failed to fetch candidates:', e);
+    }
+}
+
+function renderCurrentCandidate() {
+    const card = document.getElementById('profile-card');
+    const emptyState = document.getElementById('discovery-empty-state');
+    const dockActions = document.querySelector('.discovery-dock-actions');
+
+    if (!discoveryCandidates || discoveryCandidates.length === 0 || currentCandidateIndex >= discoveryCandidates.length) {
+        if (card) card.style.display = 'none';
+        if (dockActions) dockActions.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'flex';
+        return;
+    }
+
+    if (card) card.style.display = 'flex';
+    if (dockActions) dockActions.style.display = 'flex';
+    if (emptyState) emptyState.style.display = 'none';
+
+    const candidate = discoveryCandidates[currentCandidateIndex];
+    if (!candidate) return;
+
+    // Photos
+    const photos = candidate.photos && candidate.photos.length > 0 ? candidate.photos : ['/assets/images/no-avatar.png'];
+    const photoUrl = photos[currentCandidatePhotoIndex] || photos[0];
+    const imgEl = document.getElementById('current-profile-img');
+    if (imgEl) imgEl.src = photoUrl;
+
+    // Dots indicator
+    const dotsContainer = document.getElementById('photo-dots');
+    if (dotsContainer) {
+        if (photos.length > 1) {
+            dotsContainer.innerHTML = photos.map((_, i) => 
+                `<div class="photo-dot ${i === currentCandidatePhotoIndex ? 'active' : ''}"></div>`
+            ).join('');
+            dotsContainer.style.display = 'flex';
+        } else {
+            dotsContainer.style.display = 'none';
+        }
+    }
+
+    // Name & Age
+    const nameStr = `${candidate.name || 'Foydalanuvchi'}${candidate.age ? ', ' + candidate.age : ''}`;
+    const nameEl = document.getElementById('card-user-name');
+    if (nameEl) nameEl.innerText = nameStr;
+    const sheetNameEl = document.getElementById('sheet-user-name');
+    if (sheetNameEl) sheetNameEl.innerText = nameStr;
+
+    // VIP Tag
+    document.querySelectorAll('.vip-tag').forEach(tag => {
+        tag.style.display = candidate.is_vip ? 'inline-block' : 'none';
+    });
+
+    // City & Location
+    const cityText = candidate.city_label || candidate.city || 'Toshkent';
+    const cityEl = document.getElementById('card-user-city');
+    if (cityEl) cityEl.innerText = cityText;
+    const sheetCityEl = document.getElementById('sheet-user-city');
+    if (sheetCityEl) sheetCityEl.innerText = cityText;
+
+    // Bio
+    const bioText = candidate.bio || 'O\'zi haqida ma\'lumot kiritilmagan';
+    const bioEl = document.getElementById('card-user-bio');
+    if (bioEl) bioEl.innerText = bioText;
+    const sheetBioEl = document.getElementById('sheet-user-bio');
+    if (sheetBioEl) sheetBioEl.innerText = bioText;
+
+    // Details Sheet specific items
+    const heightEl = document.getElementById('sheet-user-height');
+    if (heightEl) heightEl.innerText = candidate.height ? `${candidate.height} sm` : 'Ko\'rsatilmagan';
+    const weightEl = document.getElementById('sheet-user-weight');
+    if (weightEl) weightEl.innerText = candidate.weight ? `${candidate.weight} kg` : 'Ko\'rsatilmagan';
+    const occEl = document.getElementById('sheet-user-occ');
+    if (occEl) occEl.innerText = candidate.occupation || 'Ko\'rsatilmagan';
+}
+
+function changePhoto(dir) {
+    haptic();
+    const candidate = discoveryCandidates[currentCandidateIndex];
+    if (!candidate || !candidate.photos || candidate.photos.length <= 1) return;
+
+    currentCandidatePhotoIndex += dir;
+    if (currentCandidatePhotoIndex < 0) {
+        currentCandidatePhotoIndex = candidate.photos.length - 1;
+    } else if (currentCandidatePhotoIndex >= candidate.photos.length) {
+        currentCandidatePhotoIndex = 0;
+    }
+
+    const imgEl = document.getElementById('current-profile-img');
+    if (imgEl) imgEl.src = candidate.photos[currentCandidatePhotoIndex];
+
+    const dots = document.querySelectorAll('.photo-dot');
+    dots.forEach((d, i) => d.classList.toggle('active', i === currentCandidatePhotoIndex));
+}
 
 function handleCardAction(action) {
     haptic();
-    const photoBox = document.getElementById('card-photo-box');
-    if (!photoBox) return;
+    const currentCandidate = discoveryCandidates[currentCandidateIndex];
+    if (!currentCandidate) return;
+
+    const card = document.getElementById('profile-card');
 
     if (action === 'like') {
-        photoBox.style.transform = 'scale(1.05) rotate(4deg)';
-        photoBox.style.opacity = '0.4';
-        confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        if (card) {
+            card.style.transform = 'translateX(80px) rotate(8deg)';
+            card.style.opacity = '0.3';
+        }
+        if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+        
+        // Send like to backend
+        const userId = state.userId || localStorage.getItem('matchme_user_id');
+        if (userId) {
+            fetch('/api/likes/like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    target_user_id: currentCandidate.id
+                })
+            }).catch(e => console.log('Like err:', e));
+        }
     } else if (action === 'dislike') {
-        photoBox.style.transform = 'scale(0.95) rotate(-4deg)';
-        photoBox.style.opacity = '0.4';
+        if (card) {
+            card.style.transform = 'translateX(-80px) rotate(-8deg)';
+            card.style.opacity = '0.3';
+        }
     } else if (action === 'gift') {
-        photoBox.style.transform = 'scale(1.08)';
-        confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+        openVipModal();
+        return;
     }
 
     setTimeout(() => {
-        currentProfileIndex = (currentProfileIndex + 1) % sampleProfiles.length;
-        loadProfileCard(sampleProfiles[currentProfileIndex]);
-        photoBox.style.transition = 'none';
-        photoBox.style.transform = 'none';
-        photoBox.style.opacity = '1';
-        setTimeout(() => { photoBox.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'; }, 50);
-    }, 280);
-}
-
-function loadProfileCard(profile) {
-    const cardImg = document.getElementById('card-bg-image');
-    const nameEl = document.getElementById('user-name-val');
-    const cityEl = document.getElementById('user-city-val');
-    const tagsBox = document.getElementById('user-tags-box');
-
-    if (cardImg) cardImg.src = profile.image;
-    if (nameEl) nameEl.innerText = profile.name;
-    if (cityEl) cityEl.innerText = profile.city;
-    if (tagsBox && profile.tags) {
-        tagsBox.innerHTML = profile.tags.map(t => `<span class="user-tag-pill">${t}</span>`).join('');
-    }
+        currentCandidateIndex++;
+        currentCandidatePhotoIndex = 0;
+        if (card) {
+            card.style.transition = 'none';
+            card.style.transform = 'none';
+            card.style.opacity = '1';
+        }
+        renderCurrentCandidate();
+        setTimeout(() => {
+            if (card) card.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+        }, 50);
+    }, 250);
 }
 
 function openReportModal() {
@@ -608,6 +814,8 @@ function openReportModal() {
 
 function toggleProfileDetails() {
     haptic();
+    const sheet = document.getElementById('profile-sheet');
+    if (sheet) sheet.classList.toggle('active');
 }
 
 function openBonusModal() {

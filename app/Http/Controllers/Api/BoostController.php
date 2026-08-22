@@ -21,7 +21,7 @@ class BoostController extends Controller
     public function getStatus(Request $request): JsonResponse
     {
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
@@ -55,7 +55,7 @@ class BoostController extends Controller
         }
 
         $userId = $request->input('user_id');
-        $user = User::find($userId) ?? User::first();
+        $user = User::find($userId);
 
         if (!$user) {
             return response()->json(['status' => false, 'message' => __('message.Not found')], 404);

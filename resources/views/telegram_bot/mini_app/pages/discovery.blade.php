@@ -541,14 +541,36 @@
 
 @section('content')
 <div class="discovery-container">
+    <!-- Discovery Empty State (Shown when no matching users) -->
+    <div class="discovery-empty-state" id="discovery-empty-state" style="display: none;">
+        <div class="empty-radar-circle">
+            <span class="radar-pulse"></span>
+            <span class="radar-icon">🎴</span>
+        </div>
+        <h3 class="empty-radar-title">Mos anketalar hozircha yo'q</h3>
+        <p class="empty-radar-sub">
+            Qidiruv mezonlariga mos yangi nomzodlar topilmadi. Filtrni kengaytirib ko'ring yoki yangi foydalanuvchilar qo'shilishini kuting ✨
+        </p>
+        <button type="button" class="btn-radar-filter" onclick="openFilterModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span>Qidiruv Filtrlarini O'zgartirish</span>
+        </button>
+    </div>
+
     <!-- Profile Card (Wide & Proportionate) -->
     <div class="profile-card-wrapper" id="profile-card">
         <!-- Photo Dots Indicator (Top Center) -->
-        <div class="photo-dots-container" id="photo-dots">
-            <div class="photo-dot active"></div>
-            <div class="photo-dot"></div>
-            <div class="photo-dot"></div>
-        </div>
+        <div class="photo-dots-container" id="photo-dots" style="display: none;"></div>
 
         <!-- Floating Tools ON TOP OF PHOTO -->
         <div class="card-top-tools">
@@ -582,8 +604,8 @@
 
         <!-- Photo Slider -->
         <div class="photo-slider-box">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1080&auto=format&fit=crop&q=85" 
-                 alt="Madina" 
+            <img src="{{ asset('assets/images/no-avatar.png') }}" 
+                 alt="Profile" 
                  class="profile-photo" 
                  id="current-profile-img">
             <!-- Tap areas -->
@@ -595,8 +617,8 @@
         <div class="card-info-overlay">
             <div class="user-main-row">
                 <h2 class="user-name-title">
-                    <span id="card-user-name">Madina, 23</span>
-                    <span class="vip-tag">👑 VIP</span>
+                    <span id="card-user-name">...</span>
+                    <span class="vip-tag" style="display: none;">👑 VIP</span>
                 </h2>
                 <button type="button" class="btn-expand-profile" onclick="toggleProfileDetails()" title="Batafsil">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -606,21 +628,10 @@
             </div>
 
             <div class="user-meta-chips">
-                <span class="meta-chip">📍 <span id="card-user-city">Toshkent, 3 km</span></span>
-                <span class="meta-chip">💍 <span id="card-user-purpose">Nikoh va oila</span></span>
+                <span class="meta-chip">📍 <span id="card-user-city">...</span></span>
             </div>
 
-            <p class="user-bio-text" id="card-user-bio">
-                Dizayner & musiqachi 🎨 Sevimli mashg'ulotim — kofe bilan kitob o'qish va kechki shahar sayrlari.
-            </p>
-
-            <!-- Interests Chips -->
-            <div class="user-interests-row" id="card-user-interests">
-                <span class="interest-tag">☕ Qahva</span>
-                <span class="interest-tag">🎨 UI/UX</span>
-                <span class="interest-tag">✈️ Sayohat</span>
-                <span class="interest-tag">🎬 Netflix</span>
-            </div>
+            <p class="user-bio-text" id="card-user-bio"></p>
         </div>
     </div>
 
@@ -686,12 +697,12 @@
         <div class="sheet-header-box">
             <div>
                 <h3 class="sheet-name">
-                    <span id="sheet-user-name">Madina, 23</span>
-                    <span class="vip-tag">👑 VIP</span>
+                    <span id="sheet-user-name">...</span>
+                    <span class="vip-tag" style="display: none;">👑 VIP</span>
                 </h3>
                 <div class="sheet-location">
                     <span>📍</span>
-                    <span id="sheet-user-city">Toshkent shahri (3 km masofada)</span>
+                    <span id="sheet-user-city">...</span>
                 </div>
             </div>
             <button type="button" class="btn-sheet-close" onclick="toggleProfileDetails()">✕</button>
@@ -701,24 +712,22 @@
         <div class="stats-grid">
             <div class="stat-box">
                 <div class="stat-label">📏 Bo'yi</div>
-                <div class="stat-value">168 sm</div>
+                <div class="stat-value" id="sheet-user-height">Ko'rsatilmagan</div>
             </div>
             <div class="stat-box">
                 <div class="stat-label">⚖️ Vazni</div>
-                <div class="stat-value">54 kg</div>
+                <div class="stat-value" id="sheet-user-weight">Ko'rsatilmagan</div>
             </div>
             <div class="stat-box">
                 <div class="stat-label">💼 Kasbi</div>
-                <div class="stat-value">Dizayner</div>
+                <div class="stat-value" id="sheet-user-occ">Ko'rsatilmagan</div>
             </div>
         </div>
 
         <!-- 2. O'zi Haqida / Bio -->
         <div class="detail-card">
             <div class="detail-card-title">📝 O'zi haqida</div>
-            <p class="m-0 text-light fs-14" style="line-height: 1.5;" id="sheet-user-bio">
-                Dizayner & musiqachi 🎨 Sevimli mashg'ulotim — kofe bilan kitob o'qish va kechki shahar sayrlari.
-            </p>
+            <p class="m-0 text-light fs-14" style="line-height: 1.5;" id="sheet-user-bio"></p>
         </div>
 
         <!-- 3. Asosiy Maqsad & Oilaviy Holati (Tartibli Karta) -->

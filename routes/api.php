@@ -25,6 +25,7 @@ Route::prefix('onboarding')->group(function () {
 
 // Discovery & Filter API Routes
 Route::prefix('discovery')->group(function () {
+    Route::get('/candidates', [DiscoveryController::class, 'getCandidates'])->name('api.discovery.candidates');
     Route::get('/filter', [DiscoveryController::class, 'getFilter'])->name('api.discovery.get_filter');
     Route::post('/filter', [DiscoveryController::class, 'saveFilter'])->name('api.discovery.save_filter');
 });

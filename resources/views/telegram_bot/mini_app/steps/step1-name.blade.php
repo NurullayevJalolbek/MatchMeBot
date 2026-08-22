@@ -13,11 +13,11 @@
 
     <div class="form-group">
         <label class="form-label">To'liq ismingiz yoki taxallusingiz</label>
-        <input type="text" id="input-name" class="form-input" placeholder="Jasur Aliyev" autocomplete="name">
+        <input type="text" id="input-name" class="form-input" placeholder="Ismingizni kiriting..." autocomplete="name" oninput="checkStep1Valid()">
     </div>
 
     <div class="button-row">
-        <button class="btn-primary" onclick="submitStep1()">
+        <button class="btn-primary disabled" id="btn-submit-step1" onclick="submitStep1()" disabled>
             Davom etish ➔
         </button>
     </div>

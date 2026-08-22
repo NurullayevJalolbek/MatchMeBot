@@ -15,7 +15,7 @@
         <label class="form-label">Sizning jinsingiz:</label>
         <div class="selection-grid">
             <!-- Male -->
-            <div class="option-card selected" id="gender-male" onclick="selectGender('male')">
+            <div class="option-card" id="gender-male" onclick="selectGender('male')">
                 <div class="option-icon-box">
                     <svg viewBox="0 0 24 24" stroke-width="2">
                         <circle cx="10" cy="14" r="5"></circle>
@@ -44,7 +44,7 @@
         <label class="form-label">Kimni qidiryapsiz?</label>
         <div class="selection-grid">
             <!-- Looking Female -->
-            <div class="option-card selected" id="looking-female" onclick="selectLooking('female')">
+            <div class="option-card" id="looking-female" onclick="selectLooking('female')">
                 <div class="option-icon-box">
                     <svg viewBox="0 0 24 24" stroke-width="2">
                         <circle cx="12" cy="9" r="5"></circle>
@@ -73,7 +73,7 @@
         <button class="btn-back" onclick="goToStep(2)">
             Orqaga
         </button>
-        <button class="btn-primary" onclick="submitStep3()">
+        <button class="btn-primary disabled" id="btn-submit-step3" onclick="submitStep3()" disabled>
             Davom etish ➔
         </button>
     </div>

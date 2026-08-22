@@ -12,8 +12,8 @@
     <p class="step-subheading">Qiziqishlaringiz va o'zingiz haqingizda qisqacha ma'lumot.</p>
 
     <div class="form-group">
-        <label class="form-label">Bio (O'zingiz haqingizda)</label>
-        <textarea id="input-bio" class="bio-textarea" maxlength="250" placeholder="Salom! Yangi do'stlar va samimiy suhbatlar uchun ochiqman..." oninput="updateBioCounter()"></textarea>
+        <label class="form-label">Bio (O'zingiz haqingizda - kamida 10 ta belgi) *</label>
+        <textarea id="input-bio" class="bio-textarea" maxlength="250" placeholder="Salom! Qiziqishlarim va o'zim haqimda..." oninput="updateBioCounter(); checkStep5Valid();"></textarea>
         <div class="bio-counter" id="bio-counter">0 / 250</div>
     </div>
 
@@ -30,7 +30,7 @@
         <button class="btn-back" onclick="goToStep(4)">
             Orqaga
         </button>
-        <button class="btn-primary" onclick="submitStep5()">
+        <button class="btn-primary disabled" id="btn-submit-step5" onclick="submitStep5()" disabled>
             Davom etish ➔
         </button>
     </div>

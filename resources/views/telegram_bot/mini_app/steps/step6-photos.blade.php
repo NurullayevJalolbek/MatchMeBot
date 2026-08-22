@@ -34,7 +34,7 @@
         <button class="btn-back" onclick="goToStep(5)">
             Orqaga
         </button>
-        <button class="btn-primary" id="btn-submit-step6" onclick="submitStep6()">
+        <button class="btn-primary disabled" id="btn-submit-step6" onclick="submitStep6()" disabled>
             Profilni Yakunlash
         </button>
     </div>
