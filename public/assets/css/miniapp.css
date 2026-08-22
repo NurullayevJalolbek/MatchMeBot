@@ -3803,6 +3803,84 @@ select.form-select option {
     transform: scale(0.98);
 }
 
+/* ==================== DISCOVERY EMPTY STATE ==================== */
+.discovery-empty-state {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    box-sizing: border-box;
+    z-index: 20;
+    background: #0c0e17;
+}
+.empty-radar-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 45, 85, 0.12);
+    border: 2px solid rgba(255, 45, 85, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 24px;
+}
+.radar-pulse {
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 45, 85, 0.4);
+    animation: radarPulse 2s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes radarPulse {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+.radar-icon {
+    font-size: 42px;
+    line-height: 1;
+}
+.empty-radar-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+}
+.empty-radar-sub {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    max-width: 320px;
+    margin: 0 0 28px 0;
+}
+.btn-radar-filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #ff2d55 0%, #ff5252 100%);
+    color: #ffffff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 26px;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 6px 22px rgba(255, 45, 85, 0.4);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+}
+.btn-radar-filter:active {
+    transform: scale(0.96);
+}
+
 
 
 

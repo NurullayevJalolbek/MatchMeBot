@@ -51,13 +51,13 @@
                         @foreach($vipLikes as $like)
                             <div class="vip-profile-card" id="like-card-{{ $like->id }}">
                                 <div class="vip-gift-floating-pill">
-                                    <span>🎁 {{ $like->gift_icon ?? '🌹' }} {{ $like->gift_name ?? 'Atirgul' }}</span>
+                                    <span>🎁 {{ $like->gift_icon ?? '🎁' }} {{ $like->gift_name ?? 'Sovg\'a' }}</span>
                                 </div>
-                                <img src="{{ $like->fromUser?->primary_photo_url ?? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80' }}" alt="{{ $like->fromUser?->name }}" class="vip-card-img">
+                                <img src="{{ $like->fromUser?->primary_photo_url ?? asset('assets/images/no-avatar.png') }}" alt="{{ $like->fromUser?->name }}" class="vip-card-img">
                                 <div class="vip-card-gradient">
                                     <div class="vip-card-info">
-                                        <div class="vip-user-name">{{ $like->fromUser?->name ?? 'Diyora' }}, {{ $like->fromUser?->age ?? 22 }}</div>
-                                        <div class="vip-user-sub">Top-1 Moslik</div>
+                                        <div class="vip-user-name">{{ $like->fromUser?->name ?? 'Foydalanuvchi' }}{{ $like->fromUser?->age ? ', ' . $like->fromUser->age : '' }}</div>
+                                        <div class="vip-user-sub">VIP Sovg'a</div>
                                     </div>
                                     <div class="vip-card-actions">
                                         <button type="button" class="btn-vip-action btn-vip-reject" onclick="handleLikeReject({{ $like->id }})" title="Rad etish">✕</button>

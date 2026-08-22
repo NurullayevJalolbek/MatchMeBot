@@ -536,6 +536,84 @@
         border-color: rgba(255, 184, 0, 0.35);
         color: #ffb800;
     }
+
+    /* Discovery Empty State */
+    .discovery-empty-state {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        z-index: 20;
+        background: #0c0e17;
+    }
+    .empty-radar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 45, 85, 0.12);
+        border: 2px solid rgba(255, 45, 85, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-bottom: 24px;
+    }
+    .radar-pulse {
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 45, 85, 0.4);
+        animation: radarPulse 2s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    @keyframes radarPulse {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+    .radar-icon {
+        font-size: 42px;
+        line-height: 1;
+    }
+    .empty-radar-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 12px 0;
+        line-height: 1.3;
+    }
+    .empty-radar-sub {
+        font-size: 0.95rem;
+        color: #94a3b8;
+        line-height: 1.55;
+        max-width: 320px;
+        margin: 0 0 28px 0;
+    }
+    .btn-radar-filter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #ff2d55 0%, #ff5252 100%);
+        color: #ffffff;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 26px;
+        font-size: 1rem;
+        font-weight: 700;
+        box-shadow: 0 6px 22px rgba(255, 45, 85, 0.4);
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        user-select: none;
+    }
+    .btn-radar-filter:active {
+        transform: scale(0.96);
+    }
 </style>
 @endpush
 
@@ -547,9 +625,9 @@
             <span class="radar-pulse"></span>
             <span class="radar-icon">🎴</span>
         </div>
-        <h3 class="empty-radar-title">Mos anketalar hozircha yo'q</h3>
+        <h3 class="empty-radar-title">Anketalar boshqa qolmadi</h3>
         <p class="empty-radar-sub">
-            Qidiruv mezonlariga mos yangi nomzodlar topilmadi. Filtrni kengaytirib ko'ring yoki yangi foydalanuvchilar qo'shilishini kuting ✨
+            Filterni kengroq qilib qaytadan urinib ko'ring yoki yangi foydalanuvchilar qo'shilishini kuting ✨
         </p>
         <button type="button" class="btn-radar-filter" onclick="openFilterModal()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -563,7 +641,7 @@
                 <line x1="9" y1="8" x2="15" y2="8"></line>
                 <line x1="17" y1="16" x2="23" y2="16"></line>
             </svg>
-            <span>Qidiruv Filtrlarini O'zgartirish</span>
+            <span>Filtrni O'zgartirish</span>
         </button>
     </div>
 
@@ -808,78 +886,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Photo Carousel State
-    const userPhotos = [
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1080&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1080&auto=format&fit=crop&q=85',
-        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1080&auto=format&fit=crop&q=85'
-    ];
-    let currentPhotoIndex = 0;
-
-    function renderPhotoDots() {
-        const dotsBox = document.getElementById('photo-dots');
-        if (!dotsBox) return;
-        dotsBox.innerHTML = '';
-        userPhotos.forEach((_, idx) => {
-            const dot = document.createElement('div');
-            dot.className = 'photo-dot ' + (idx === currentPhotoIndex ? 'active' : '');
-            dotsBox.appendChild(dot);
-        });
-    }
-
-    function changePhoto(direction) {
-        currentPhotoIndex += direction;
-        if (currentPhotoIndex >= userPhotos.length) currentPhotoIndex = 0;
-        if (currentPhotoIndex < 0) currentPhotoIndex = userPhotos.length - 1;
-
-        const img = document.getElementById('current-profile-img');
-        if (img) {
-            img.style.opacity = '0.4';
-            setTimeout(() => {
-                img.src = userPhotos[currentPhotoIndex];
-                img.style.opacity = '1';
-            }, 100);
-        }
-        renderPhotoDots();
-    }
-
-    function toggleProfileDetails() {
-        const sheet = document.getElementById('profile-sheet');
-        if (sheet) {
-            sheet.classList.toggle('show');
-        }
-    }
-
-    function handleCardAction(action) {
-        const card = document.getElementById('profile-card');
-        if (!card) return;
-
-        if (action === 'like') {
-            card.style.transform = 'translateX(100px) rotate(15deg)';
-            card.style.opacity = '0';
-            if (window.confetti) {
-                confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
-            }
-        } else {
-            card.style.transform = 'translateX(-100px) rotate(-15deg)';
-            card.style.opacity = '0';
-        }
-
-        setTimeout(() => {
-            card.style.transition = 'none';
-            card.style.transform = 'none';
-            card.style.opacity = '1';
-            setTimeout(() => {
-                card.style.transition = '';
-            }, 50);
-        }, 350);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        renderPhotoDots();
-    });
-</script>
-@endpush

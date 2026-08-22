@@ -6,9 +6,91 @@ use App\Contracts\iLikesService;
 use App\Enums\Like\LikeStatusEnum;
 use App\Models\User;
 use App\Models\UserLike;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LikesService implements iLikesService
 {
+    /**
+     * Send a like or VIP gift to a target user and notify via Telegram.
+     */
+    public function sendLike(User $fromUser, int $targetUserId, bool $isGift = false, ?string $giftName = null, ?string $giftIcon = null): array
+    {
+        if ($fromUser->id === $targetUserId) {
+            return [
+                'success' => false,
+                'message' => 'O\'zingizga layk bosa olmaysiz',
+            ];
+        }
+
+        $targetUser = User::find($targetUserId);
+        if (!$targetUser) {
+            return [
+                'success' => false,
+                'message' => 'Foydalanuvchi topilmadi',
+            ];
+        }
+
+        // Check if mutual like (they already liked us)
+        $existingTargetLike = UserLike::where('from_user_id', $targetUserId)
+            ->where('to_user_id', $fromUser->id)
+            ->first();
+
+        $isMatch = false;
+
+        $userLike = UserLike::updateOrCreate(
+            [
+                'from_user_id' => $fromUser->id,
+                'to_user_id' => $targetUserId,
+            ],
+            [
+                'is_gift' => $isGift,
+                'gift_name' => $giftName,
+                'gift_icon' => $giftIcon,
+                'status' => $existingTargetLike ? LikeStatusEnum::ACCEPTED->value : LikeStatusEnum::PENDING->value,
+            ]
+        );
+
+        $fromName = htmlspecialchars($fromUser->name ?? $fromUser->first_name ?? 'Foydalanuvchi');
+        $targetName = htmlspecialchars($targetUser->name ?? $targetUser->first_name ?? 'Foydalanuvchi');
+
+        if ($existingTargetLike) {
+            $isMatch = true;
+            $existingTargetLike->update(['status' => LikeStatusEnum::ACCEPTED->value]);
+
+            // Notify target user about MATCH
+            $this->sendTelegramNotification(
+                $targetUser->telegram_id,
+                "🎉 <b>Yangi Moslik (Match)!</b>\n\nSiz va <b>{$fromName}</b> bir-biringizni yoqtirdingiz! Suhbatni boshlash uchun Mini-Appni oching. 💬",
+                '/likes'
+            );
+
+            // Notify current user about MATCH
+            $this->sendTelegramNotification(
+                $fromUser->telegram_id,
+                "🎉 <b>Yangi Moslik (Match)!</b>\n\nSiz va <b>{$targetName}</b> bir-biringizni yoqtirdingiz! Suhbatni boshlash uchun Mini-Appni oching. 💬",
+                '/likes'
+            );
+        } else {
+            // Notify target user about new LIKE
+            $senderTitle = $isGift ? "🎁 <b>Yangi VIP Sovg'a va Layk!</b>" : "❤️ <b>Sizga yangi layk keldi!</b>";
+            $giftDesc = $isGift && $giftName ? "\nSizga <b>{$giftIcon} {$giftName}</b> sovg'asi yuborildi!" : "";
+            
+            $this->sendTelegramNotification(
+                $targetUser->telegram_id,
+                "{$senderTitle}\n\nKimdir sizning profilingizni yoqtirdi!{$giftDesc}\nAnketani ko'rish uchun quyidagi tugmani bosing 👇",
+                '/likes'
+            );
+        }
+
+        return [
+            'success' => true,
+            'message' => $isMatch ? 'Tabriklaymiz! Sizda yangi moslik bor!' : 'Layk yuborildi',
+            'is_match' => $isMatch,
+            'like_id' => $userLike->id,
+        ];
+    }
+
     /**
      * Get VIP gift senders and normal likes for user.
      */
@@ -27,13 +109,13 @@ class LikesService implements iLikesService
                 'like_id' => $like->id,
                 'user_id' => $sender->id,
                 'name' => $sender->name ?? $sender->first_name ?? 'Foydalanuvchi',
-                'age' => $sender->age ?? 22,
+                'age' => $sender->age ?? null,
                 'city' => $sender->city ?? 'Toshkent',
-                'photo' => $sender->primary_photo_url ?? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80',
+                'photo' => $sender->primary_photo_url ?? asset('assets/images/no-avatar.png'),
                 'gift_name' => $like->gift_name ?? 'Sovg\'a',
                 'gift_icon' => $like->gift_icon ?? '🎁',
                 'badge' => "🎁 {$like->gift_icon} {$like->gift_name}",
-                'subtext' => 'Top-1 Moslik',
+                'subtext' => 'VIP Sovg\'a',
             ];
         })->values()->toArray();
 
@@ -44,9 +126,9 @@ class LikesService implements iLikesService
                 'like_id' => $like->id,
                 'user_id' => $sender->id,
                 'name' => $sender->name ?? $sender->first_name ?? 'Foydalanuvchi',
-                'age' => $sender->age ?? 21,
+                'age' => $sender->age ?? null,
                 'city' => $sender->city ?? 'Toshkent',
-                'photo' => $sender->primary_photo_url ?? 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+                'photo' => $sender->primary_photo_url ?? asset('assets/images/no-avatar.png'),
                 'subtext' => ucfirst(str_replace('_', ' ', $sender->city ?? 'Toshkent')),
             ];
         })->values()->toArray();
@@ -57,8 +139,6 @@ class LikesService implements iLikesService
             'regular_likes' => $regularLikes,
             'regular_likes_count' => count($regularLikes),
             'total_likes_count' => count($allLikes),
-            'user_balance' => (float) ($user->balance ?? 0),
-            'formatted_balance' => number_format((float) ($user->balance ?? 0), 0, '.', ' ') . ' UZS',
             'daily_streak' => $user->daily_streak ?: 1,
         ];
     }
@@ -83,6 +163,14 @@ class LikesService implements iLikesService
         $like->update(['status' => LikeStatusEnum::ACCEPTED->value]);
 
         $senderName = $like->fromUser->name ?? $like->fromUser->first_name ?? 'Foydalanuvchi';
+        $currentUserName = $user->name ?? $user->first_name ?? 'Foydalanuvchi';
+
+        // Notify the original sender that their like was accepted!
+        $this->sendTelegramNotification(
+            $like->fromUser->telegram_id,
+            "🎉 <b>Tabriklaymiz! Sizda yangi moslik bor!</b>\n\n<b>{$currentUserName}</b> sizning laykingizni qabul qildi. Endi bir-biringiz bilan muloqot qilishingiz mumkin! 💬",
+            '/likes'
+        );
 
         return [
             'success' => true,
@@ -114,5 +202,45 @@ class LikesService implements iLikesService
             'success' => true,
             'message' => 'O\'chirildi',
         ];
+    }
+
+    /**
+     * Send Telegram notification with Mini-App WebApp button.
+     */
+    protected function sendTelegramNotification(?int $telegramId, string $message, string $page = '/likes'): void
+    {
+        if (!$telegramId) {
+            return;
+        }
+
+        $botToken = config('services.telegram.bot_token') ?: env('TELEGRAM_BOT_TOKEN') ?: env('BOT_TOKEN');
+        if (!$botToken) {
+            return;
+        }
+
+        $appUrl = config('services.telegram.webapp_url') ?: env('TELEGRAM_WEBAPP_URL') ?: env('APP_URL');
+        $webAppUrl = rtrim($appUrl, '/') . $page;
+
+        $keyboard = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => '❤️ Layklarni ko\'rish',
+                        'web_app' => ['url' => $webAppUrl]
+                    ]
+                ]
+            ]
+        ];
+
+        try {
+            Http::timeout(4)->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                'chat_id' => $telegramId,
+                'text' => $message,
+                'parse_mode' => 'HTML',
+                'reply_markup' => json_encode($keyboard),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Telegram like notification failed: ' . $e->getMessage());
+        }
     }
 }

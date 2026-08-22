@@ -16,6 +16,47 @@ class LikesController extends Controller
     ) {}
 
     /**
+     * Send a like or VIP gift to another user.
+     */
+    public function sendLike(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'target_user_id' => 'required|exists:users,id',
+            'is_gift' => 'nullable|boolean',
+            'gift_name' => 'nullable|string|max:100',
+            'gift_icon' => 'nullable|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::find($request->input('user_id'));
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => __('message.Not found')], 404);
+        }
+
+        $result = $this->likesService->sendLike(
+            $user,
+            (int) $request->input('target_user_id'),
+            (bool) $request->input('is_gift', false),
+            $request->input('gift_name'),
+            $request->input('gift_icon')
+        );
+
+        return response()->json([
+            'status' => $result['success'],
+            'message' => $result['message'],
+            'data' => $result,
+        ], $result['success'] ? 200 : 400);
+    }
+
+    /**
      * Get likes & VIP gifts list for user.
      */
     public function getLikes(Request $request): JsonResponse

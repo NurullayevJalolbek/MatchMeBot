@@ -781,7 +781,15 @@ function handleCardAction(action) {
                     user_id: userId,
                     target_user_id: currentCandidate.id
                 })
-            }).catch(e => console.log('Like err:', e));
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.is_match) {
+                    if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+                    if (window.showToast) window.showToast('🎉 Tabriklaymiz! Sizda yangi moslik (Match) bor!');
+                }
+            })
+            .catch(e => console.log('Like err:', e));
         }
     } else if (action === 'dislike') {
         if (card) {

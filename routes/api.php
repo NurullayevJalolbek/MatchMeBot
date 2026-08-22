@@ -39,6 +39,7 @@ Route::prefix('boost')->group(function () {
 // Likes & VIP Gifts API Routes
 Route::prefix('likes')->middleware(['locale'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Api\LikesController::class, 'getLikes'])->name('api.likes.index');
+    Route::post('/like', [\App\Http\Controllers\Api\LikesController::class, 'sendLike'])->name('api.likes.send');
     Route::post('/accept', [\App\Http\Controllers\Api\LikesController::class, 'accept'])->name('api.likes.accept');
     Route::post('/reject', [\App\Http\Controllers\Api\LikesController::class, 'reject'])->name('api.likes.reject');
 });
